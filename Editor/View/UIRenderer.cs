@@ -1,11 +1,11 @@
 ﻿using System;
-using CodePreview.Editor.Data;
-using CodePreview.Editor.Helpers;
-using CodePreview.Editor.Settings;
+using OpalStudio.CodePreview.Editor.Data;
+using OpalStudio.CodePreview.Editor.Helpers;
+using OpalStudio.CodePreview.Editor.Settings;
 using UnityEditor;
 using UnityEngine;
 
-namespace CodePreview.Editor.View
+namespace OpalStudio.CodePreview.Editor.View
 {
       public sealed class UIRenderer : IDisposable
       {

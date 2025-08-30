@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CodePreview.Editor.Helpers
+namespace OpalStudio.CodePreview.Editor.Helpers
 {
       public sealed class SearchManager
       {

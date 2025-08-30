@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace CodePreview.Editor.Settings
+namespace OpalStudio.CodePreview.Editor.Settings
 {
       [Serializable]
       public class PreviewSettings

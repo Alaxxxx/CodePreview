@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CodePreview.Editor.Data
+namespace OpalStudio.CodePreview.Editor.Data
 {
       [Serializable]
       public class FileInfo

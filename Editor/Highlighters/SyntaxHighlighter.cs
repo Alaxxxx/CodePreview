@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using CodePreview.Editor.Core;
-using CodePreview.Editor.Data;
-using CodePreview.Editor.Settings;
+using OpalStudio.CodePreview.Editor.Core;
+using OpalStudio.CodePreview.Editor.Data;
+using OpalStudio.CodePreview.Editor.Settings;
 using UnityEditor;
 
-namespace CodePreview.Editor.Highlighters
+namespace OpalStudio.CodePreview.Editor.Highlighters
 {
       public sealed class SyntaxHighlighter
       {

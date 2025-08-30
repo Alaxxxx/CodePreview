@@ -1,4 +1,4 @@
-﻿namespace CodePreview.Editor.Data
+﻿namespace OpalStudio.CodePreview.Editor.Data
 {
       public enum ScriptType
       {

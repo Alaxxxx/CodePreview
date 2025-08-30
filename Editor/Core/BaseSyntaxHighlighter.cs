@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CodePreview.Editor.Core
+namespace OpalStudio.CodePreview.Editor.Core
 {
       public abstract class BaseSyntaxHighlighter
       {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using CodePreview.Editor.Data;
+using OpalStudio.CodePreview.Editor.Data;
 
-namespace CodePreview.Editor.Helpers
+namespace OpalStudio.CodePreview.Editor.Helpers
 {
       public static class ScriptTypeDetector
       {

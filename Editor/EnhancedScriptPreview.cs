@@ -1,13 +1,13 @@
 using System;
-using CodePreview.Editor.Data;
-using CodePreview.Editor.Helpers;
-using CodePreview.Editor.Highlighters;
-using CodePreview.Editor.Settings;
-using CodePreview.Editor.View;
+using OpalStudio.CodePreview.Editor.Data;
+using OpalStudio.CodePreview.Editor.Helpers;
+using OpalStudio.CodePreview.Editor.Highlighters;
+using OpalStudio.CodePreview.Editor.Settings;
+using OpalStudio.CodePreview.Editor.View;
 using UnityEditor;
 using UnityEngine;
 
-namespace CodePreview.Editor
+namespace OpalStudio.CodePreview.Editor
 {
       [CustomEditor(typeof(MonoScript))]
       public sealed class EnhancedScriptPreview : UnityEditor.Editor
@@ -50,7 +50,7 @@ namespace CodePreview.Editor
 
             public override void OnInspectorGUI()
             {
-                  var script = (MonoScript)target;
+                  var script = (MonoScript)this.target;
 
                   if (!script)
                   {

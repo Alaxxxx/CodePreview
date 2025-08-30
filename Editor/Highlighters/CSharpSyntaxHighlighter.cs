@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using CodePreview.Editor.Core;
+using OpalStudio.CodePreview.Editor.Core;
 
-namespace CodePreview.Editor.Highlighters
+namespace OpalStudio.CodePreview.Editor.Highlighters
 {
       public sealed class CSharpSyntaxHighlighter : BaseSyntaxHighlighter
       {

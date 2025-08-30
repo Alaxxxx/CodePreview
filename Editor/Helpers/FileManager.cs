@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using UnityEditor;
-using FileInfo = CodePreview.Editor.Data.FileInfo;
+using FileInfo = OpalStudio.CodePreview.Editor.Data.FileInfo;
 
-namespace CodePreview.Editor.Helpers
+namespace OpalStudio.CodePreview.Editor.Helpers
 {
       public sealed class FileManager
       {
