@@ -1,51 +1,75 @@
 # CodePreview for Unity
 
-[![GitHub license](https://img.shields.io/github/license/alaxxxx/CodePreview)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/Alaxxxx/CodePreview?style=flat-square)](https://github.com/Alaxxxx/CodePreview/releases)
-[![Unity Version](https://img.shields.io/badge/Unity-2021.3%2B-green.svg)](https://unity3d.com/get-unity/download)
-[![GitHub last commit](https://img.shields.io/github/last-commit/Alaxxxx/CodePreview)](https://github.com/Alaxxxx/CodePreview/commits/main)
+<p align="center">
+  <a href="https://github.com/Alaxxxx/CodePreview/stargazers"><img src="https://img.shields.io/github/stars/Alaxxxx/CodePreview?style=flat-square&logo=github&color=FFC107" alt="GitHub Stars"></a>
+  &nbsp;
+  <a href="https://github.com/Alaxxxx?tab=followers"><img src="https://img.shields.io/github/followers/Alaxxxx?style=flat-square&logo=github&label=Followers&color=282c34" alt="GitHub Followers"></a>
+  &nbsp;
+  <a href="https://github.com/Alaxxxx/CodePreview/commits/main"><img src="https://img.shields.io/github/last-commit/Alaxxxx/CodePreview?style=flat-square&logo=github&color=blueviolet" alt="Last Commit"></a>
+</p>
 
-A powerful and customizable preview for scripts and data files in the Unity inspector, designed to replace the default view.
+<p align="center">
+  <a href="https://github.com/Alaxxxx/CodePreview/releases"><img src="https://img.shields.io/github/v/release/Alaxxxx/CodePreview?style=flat-square" alt="Release"></a>
+  &nbsp;
+  <a href="https://unity.com/"><img src="https://img.shields.io/badge/Unity-2021.3+-2296F3.svg?style=flat-square&logo=unity" alt="Unity Version"></a>
+  &nbsp;
+  <a href="https://github.com/Alaxxxx/CodePreview/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Alaxxxx/CodePreview?style=flat-square" alt="License"></a>
+</p>
+
+<table>
+  <tr>
+    <td width="60%" valign="top">
+      <img alt="CodePreview Screenshot" src="https://github.com/user-attachments/assets/ae097fc2-f8c5-4bbb-8f5a-f6fde3af5ab7"/>
+    </td>
+    <td width="40%" valign="top">
+
+### A powerful and customizable preview for the Unity inspector.
+
+<p>Tired of Unity's tiny, unhelpful default inspector for scripts? <strong>CodePreview</strong> transforms it into a genuine productivity tool. Quickly understand, navigate, and manage your text-based assets without ever leaving the editor.</p>
+
+#### ✨ Key Functionality
+- **Theme-Aware Syntax Highlighting:** Read `C#`, `JSON`, `XML` and more with beautiful highlighting that automatically adapts to Unity's Light and Dark themes.
+- **Pleasant Markdown Reading:** Instead of a plain text file, your `.md` files are presented with syntax coloring for headers, lists, and code blocks, making them far easier to read.
+- **Instant Navigation:** Instantly search through any file with highlighted results and jump directly to any line number.
+- **File Statistics:** Get instant insights at a glance: line and word counts, file size, and the last modification date.
+- **Quick Actions Toolbar:** Edit in your IDE, copy the file path, or copy the entire content to your clipboard with a single click.
+
+#### 🎯 Supported Formats
+- `C#` (.cs)
+- `JSON` (.json)
+- `XML` (.xml)
+- `YAML` (.yaml)
+- `Markdown` (.md)
 
 <br>
 
 <p align="center">
-  <img height="500" alt="CodePreview Screenshot" src="https://github.com/user-attachments/assets/ae097fc2-f8c5-4bbb-8f5a-f6fde3af5ab7"/>
+  <a href="#-installation"><strong>🚀 Get Started &raquo;</strong></a>
 </p>
 
----
-## 🎯 Supported Formats
+  </tr>
+</table>
 
-Easily preview all your important files with dedicated syntax highlighting:
+<br>
 
-* **Scripts:** `C#` (.cs)
-* **Data:** `JSON` (.json), `XML` (.xml), `YAML` (.yaml)
-* **Documentation:** `Markdown` (.md)
-
----
 ## ✨ Features
 
-* **Advanced Syntax Highlighting:** A clean and readable preview for all supported languages, compatible with Unity's Light and Dark editor themes.
+* **🎨 Advanced Syntax Highlighting:** A clean and readable preview for all supported languages, compatible with Unity's Light and Dark themes.
+* **📄 Rendered Markdown Preview:** View your `.md` (README) files rendered directly in the inspector for a much more pleasant reading experience.
+* **🔍 Powerful Navigation:** Instantly find what you need with a built-in search tool that highlights all matches. Jump to any line number with the `Go to Line` feature.
+* **📊 Detailed Insights:** Get a complete overview of your file: line, word, and character counts, file size, and last modification date.
+* **🧠 Smart Header:** Automatically detects and displays the script type (`MonoBehaviour`, `ScriptableObject`, etc.) for immediate context.
+* **⚙️ Highly Customizable:** Adjust the font size, preview height, and other display options in a polished foldout menu.
+* **⚡ Quick Actions:** A handy toolbar to edit the script in your IDE, ping the file, copy its path, or copy its entire content.
 
-* **Rendered Markdown Preview:** View your `.md` (README) files rendered directly in the inspector for a much more pleasant reading experience.
+<br>
 
-* **Powerful Navigation:** Instantly find what you need with a built-in search tool that highlights all matches. Jump to any line number with the "Go to Line" feature.
-
-* **Detailed Insights:** Get a complete overview of your file: line, word, and character counts, file size, and last modification date.
-
-* **Smart Header:** Automatically detects and displays the script type (`MonoBehaviour`, `ScriptableObject`, etc.) for immediate context.
-
-* **Highly Customizable:** Adjust the font size, preview height, and other display options in a polished foldout menu.
-
-* **Quick Actions:** A handy toolbar to edit the script in your IDE, ping the file in the project view, copy its path, or copy its entire content.
-
----
 ## 🚀 Installation
 
-### Recommended Methods
+Choose your preferred installation method below. The recommended method is via Git URL.
 
 <details>
-<summary><strong>1. Install via Git URL (Package Manager)</strong></summary>
+<summary><strong>1. Install via Git URL (Recommended)</strong></summary>
 <br>
 
 This method installs the package directly from GitHub and allows you to update it easily.
@@ -66,21 +90,30 @@ Ideal if you prefer a specific, stable version of the asset.
 
 1.  Go to the [**Releases**](https://github.com/Alaxxxx/CodePreview/releases) page.
 2.  Download the `.unitypackage` file from the latest release.
-3.  In your Unity project, go to **`Assets > Import Package > Custom Package...`** and select the downloaded file.
+3.  In your Unity project, go to `Assets > Import Package > Custom Package...` and select the downloaded file.
 </details>
-
-### Alternative Method
 
 <details>
 <summary><strong>3. Manual Installation (from .zip)</strong></summary>
 <br>
 
-1.  Download this repository as a ZIP file by clicking **`Code > Download ZIP`**.
+1.  Download this repository as a ZIP file by clicking `Code > Download ZIP`.
 2.  Unzip the file.
 3.  Drag the unzipped package folder into your project's `Assets` directory.
 </details>
 
----
-## 📄 License
+<br>
 
-This project is distributed under the **MIT License**. See the `LICENSE` file for more details.
+## 🤝 Contributing & Supporting
+
+This project is open-source under the **MIT License**, and any form of contribution is welcome and greatly appreciated!
+
+If you find `CodePreview` useful in your workflow, the easiest way to show your support is by **giving it a star ⭐️ on GitHub!** It helps a lot with the project's visibility and motivates me to keep improving it.
+
+Here are other ways you can get involved:
+
+* **💡 Share Ideas & Report Bugs:** Have a great idea for a new feature, a supported language, or found a bug? [Open an issue](https://github.com/Alaxxxx/CodePreview/issues) to share the details.
+* **🔌 Contribute Code:** Feel free to fork the repository and submit a pull request for bug fixes or new features.
+* **🗣️ Spread the Word:** Know other Unity developers? Share this tool with them!
+
+Every contribution, from a simple star to a pull request, is incredibly valuable. Thank you for your support!
