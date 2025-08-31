@@ -1,6 +1,6 @@
 # CodePreview for Unity
 
-[![License: MIT](https://img-shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub license](https://img.shields.io/github/license/alaxxxx/CodePreview)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Alaxxxx/CodePreview?style=flat-square)](https://github.com/Alaxxxx/CodePreview/releases)
 [![Unity Version](https://img.shields.io/badge/Unity-2021.3%2B-green.svg)](https://unity3d.com/get-unity/download)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Alaxxxx/CodePreview)](https://github.com/Alaxxxx/CodePreview/commits/main)
