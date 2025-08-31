@@ -11,11 +11,10 @@ namespace OpalStudio.CodePreview.Editor.Helpers
             private FileInfo _fileInfo;
             private string[] _originalLines;
             private string[] _displayLines;
-            private bool _isLimited;
 
-            public bool CheckForChanges(MonoScript script)
+            public bool CheckForChanges(UnityEngine.Object asset)
             {
-                  string path = AssetDatabase.GetAssetPath(script);
+                  string path = AssetDatabase.GetAssetPath(asset);
 
                   if (string.IsNullOrEmpty(path) || !File.Exists(path))
                   {
@@ -46,7 +45,6 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                         string rawContent = File.ReadAllText(_filePath);
                         _originalLines = rawContent.Split('\n');
                         _displayLines = _originalLines;
-                        _isLimited = false;
 
                         _fileInfo = CalculateFileInfo(_originalLines);
                         _fileInfo.LastModifiedTime = File.GetLastWriteTime(_filePath);
@@ -63,7 +61,6 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   _filePath = filePath;
                   _originalLines = lines;
                   _displayLines = lines;
-                  _isLimited = false;
 
                   _fileInfo = CalculateFileInfo(_originalLines);
 
@@ -74,7 +71,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   }
                   else
                   {
-                        _fileInfo.LastModifiedTime = DateTime.Now;
+                        _fileInfo.LastModifiedTime = DateTimeOffset.UtcNow;
                         _fileInfo.fileSize = string.Join("\n", lines).Length;
                   }
             }
@@ -82,7 +79,6 @@ namespace OpalStudio.CodePreview.Editor.Helpers
             public void SetLimitedLines(string[] limitedLines)
             {
                   _displayLines = limitedLines;
-                  _isLimited = true;
             }
 
             public string[] GetLines() => _originalLines;
@@ -94,8 +90,6 @@ namespace OpalStudio.CodePreview.Editor.Helpers
             public FileInfo GetFileInfo() => _fileInfo;
 
             public bool HasContent() => _originalLines is { Length: > 0 };
-
-            public bool IsLimited() => _isLimited;
 
             private static FileInfo CalculateFileInfo(string[] lines)
             {
@@ -111,28 +105,14 @@ namespace OpalStudio.CodePreview.Editor.Helpers
 
                         string trimmed = line.TrimStart();
 
-                        if (trimmed.StartsWith("//") || trimmed.StartsWith("/*") || trimmed.StartsWith("*") || trimmed.Contains("*/"))
+                        if (trimmed.StartsWith("//", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("/*", StringComparison.OrdinalIgnoreCase) ||
+                            trimmed.StartsWith("*", StringComparison.OrdinalIgnoreCase) || trimmed.Contains("*/", StringComparison.OrdinalIgnoreCase))
                         {
                               info.commentLines++;
                         }
                   }
 
                   return info;
-            }
-
-            public bool HasChangedSince(DateTime lastCheck)
-            {
-                  if (string.IsNullOrEmpty(_filePath) || !File.Exists(_filePath))
-                  {
-                        return false;
-                  }
-
-                  return File.GetLastWriteTime(_filePath) > lastCheck;
-            }
-
-            public bool ShouldLimitProcessing(int maxLines)
-            {
-                  return _originalLines != null && _originalLines.Length > maxLines;
             }
       }
 }

@@ -5,7 +5,7 @@ namespace OpalStudio.CodePreview.Editor.Data
       [Serializable]
       public class FileInfo
       {
-            public DateTime LastModifiedTime;
+            public DateTimeOffset LastModifiedTime;
             public long fileSize;
             public int totalLines;
             public int totalWords;

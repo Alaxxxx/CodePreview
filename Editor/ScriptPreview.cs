@@ -10,7 +10,7 @@ using UnityEngine;
 namespace OpalStudio.CodePreview.Editor
 {
       [CustomEditor(typeof(MonoScript))]
-      public sealed class EnhancedScriptPreview : UnityEditor.Editor
+      public sealed class ScriptPreview : UnityEditor.Editor, IDisposable
       {
             // Core components
             private FileManager _fileManager;
@@ -35,17 +35,9 @@ namespace OpalStudio.CodePreview.Editor
                   _uiRenderer?.Dispose();
             }
 
-            private void InitializeComponents()
+            public void Dispose()
             {
-                  _settings = new PreviewSettings();
-                  _fileManager = new FileManager();
-                  _searchManager = new SearchManager();
-                  _uiRenderer = new UIRenderer(_settings);
-                  _syntaxHighlighter = new SyntaxHighlighter();
-
-                  // Wire up events
-                  _searchManager.OnSearchResultsChanged += OnSearchResultsChanged;
-                  _settings.OnSettingsChanged += OnSettingsChanged;
+                  _uiRenderer?.Dispose();
             }
 
             public override void OnInspectorGUI()
@@ -81,6 +73,19 @@ namespace OpalStudio.CodePreview.Editor
                   _uiRenderer.DrawCodePreview(_syntaxHighlighter.GetProcessedContent(), _fileManager.GetLines());
             }
 
+            private void InitializeComponents()
+            {
+                  _settings = new PreviewSettings();
+                  _fileManager = new FileManager();
+                  _searchManager = new SearchManager();
+                  _uiRenderer = new UIRenderer(_settings);
+                  _syntaxHighlighter = new SyntaxHighlighter();
+
+                  // Wire up events
+                  _searchManager.OnSearchResultsChanged += OnSearchResultsChanged;
+                  _settings.OnSettingsChanged += OnSettingsChanged;
+            }
+
             private void RefreshContent(MonoScript script)
             {
                   try
@@ -93,9 +98,6 @@ namespace OpalStudio.CodePreview.Editor
                               string[] limitedLines = new string[_settings.MaxLinesToDisplay];
                               Array.Copy(lines, limitedLines, _settings.MaxLinesToDisplay);
                               _fileManager.SetLimitedLines(limitedLines);
-
-                              Debug.LogWarning(
-                                          $"Script preview limited to {_settings.MaxLinesToDisplay} lines for performance. " + $"Full file has {lines.Length} lines.");
                         }
 
                         ScriptType scriptType = ScriptTypeDetector.DetectType(_fileManager.GetFilePath());

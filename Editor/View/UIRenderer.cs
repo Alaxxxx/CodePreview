@@ -1,9 +1,11 @@
 ﻿using System;
+using System.IO;
 using OpalStudio.CodePreview.Editor.Data;
 using OpalStudio.CodePreview.Editor.Helpers;
 using OpalStudio.CodePreview.Editor.Settings;
 using UnityEditor;
 using UnityEngine;
+using FileInfo = OpalStudio.CodePreview.Editor.Data.FileInfo;
 
 namespace OpalStudio.CodePreview.Editor.View
 {
@@ -31,6 +33,40 @@ namespace OpalStudio.CodePreview.Editor.View
                   _scrollViewStyle = null;
             }
 
+            private void InitializeStyles()
+            {
+                  if (_codeStyle == null || _scrollViewStyle == null || _codeStyle.fontSize != _settings.FontSize)
+                  {
+                        bool isDark = EditorGUIUtility.isProSkin;
+                        Color backgroundColor = isDark ? new Color(0.12f, 0.12f, 0.12f, 1f) : new Color(0.94f, 0.94f, 0.94f, 1f);
+
+                        var backgroundTexture = new Texture2D(1, 1);
+                        backgroundTexture.SetPixel(0, 0, backgroundColor);
+                        backgroundTexture.Apply();
+
+                        _scrollViewStyle = new GUIStyle
+                        {
+                                    normal = { background = backgroundTexture }
+                        };
+
+                        _codeStyle = new GUIStyle(GUI.skin.label)
+                        {
+                                    fontSize = _settings.FontSize,
+                                    richText = true,
+                                    wordWrap = false,
+                                    padding = new RectOffset(10, 10, 5, 5),
+                                    font = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene).font,
+                                    normal = { textColor = isDark ? Color.white : Color.black }
+                        };
+
+                        _codeStyle.hover = _codeStyle.normal;
+                        _codeStyle.active = _codeStyle.normal;
+                        _codeStyle.focused = _codeStyle.normal;
+                  }
+            }
+
+#region Headers
+
             public static void DrawHeader(MonoScript script, FileInfo fileInfo)
             {
                   EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -50,6 +86,58 @@ namespace OpalStudio.CodePreview.Editor.View
                   }
 
                   EditorGUILayout.EndVertical();
+            }
+
+            public static void DrawHeaderForTextAsset(TextAsset textAsset, FileInfo fileInfo, ScriptType scriptType)
+            {
+                  EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+                  EditorGUILayout.BeginHorizontal();
+
+                  GUIContent icon = scriptType switch
+                  {
+                              ScriptType.Json or ScriptType.XML or ScriptType.Readme or ScriptType.Yaml => EditorGUIUtility.IconContent("TextAsset Icon"),
+                              _ => EditorGUIUtility.IconContent("DefaultAsset Icon")
+                  };
+
+                  GUILayout.Label(icon, GUILayout.Width(16), GUILayout.Height(16));
+
+                  string fileName = textAsset.name + GetExtensionForType(scriptType);
+                  EditorGUILayout.LabelField(fileName, EditorStyles.boldLabel);
+
+                  GUILayout.FlexibleSpace();
+                  DrawTextAssetTypeInfo(scriptType);
+                  EditorGUILayout.EndHorizontal();
+
+                  if (fileInfo != null)
+                  {
+                        EditorGUILayout.Space(3);
+                        DrawFileStats(fileInfo);
+                  }
+
+                  EditorGUILayout.EndVertical();
+            }
+
+#endregion
+
+#region Info Sections
+
+            private static void DrawTextAssetTypeInfo(ScriptType scriptType)
+            {
+                  (string label, Color color, string tooltip) = scriptType switch
+                  {
+                              ScriptType.Json => ("JSON Data", Color.yellow, "JavaScript Object Notation configuration file"),
+                              ScriptType.XML => ("XML Document", Color.cyan, "Extensible Markup Language document"),
+                              ScriptType.Readme => ("Readme File", Color.green, "Markdown or text readme file"),
+                              ScriptType.Yaml => ("YAML Data", Color.magenta, "YAML Ain't Markup Language configuration file"),
+                              _ => ("Text File", Color.gray, "Plain text file")
+                  };
+
+                  Color oldColor = GUI.color;
+                  GUI.color = color;
+                  var typeContent = new GUIContent(label, tooltip);
+                  EditorGUILayout.LabelField(typeContent, EditorStyles.miniLabel, GUILayout.Width(100));
+                  GUI.color = oldColor;
             }
 
             private static void DrawScriptTypeInfo(MonoScript script)
@@ -124,6 +212,10 @@ namespace OpalStudio.CodePreview.Editor.View
                   GUI.color = oldColor;
             }
 
+#endregion
+
+#region File Stats
+
             private static void DrawFileStats(FileInfo fileInfo)
             {
                   EditorGUILayout.BeginHorizontal();
@@ -146,6 +238,10 @@ namespace OpalStudio.CodePreview.Editor.View
                   GUILayout.FlexibleSpace();
                   EditorGUILayout.EndHorizontal();
             }
+
+#endregion
+
+#region Search & Navigation
 
             public void DrawSearchSection(SearchManager searchManager)
             {
@@ -202,22 +298,16 @@ namespace OpalStudio.CodePreview.Editor.View
                   GUI.enabled = searchManager.HasSearchResults;
                   var previousContent = new GUIContent("◀ Previous", "Go to previous search result");
 
-                  if (GUILayout.Button(previousContent, EditorStyles.miniButton, GUILayout.Width(80)))
+                  if (GUILayout.Button(previousContent, EditorStyles.miniButton, GUILayout.Width(80)) && searchManager.GoToPreviousResult())
                   {
-                        if (searchManager.GoToPreviousResult())
-                        {
-                              ScrollToLine(searchManager.GetCurrentResultLine());
-                        }
+                        ScrollToLine(searchManager.GetCurrentResultLine());
                   }
 
                   var nextContent = new GUIContent("Next ▶", "Go to next search result");
 
-                  if (GUILayout.Button(nextContent, EditorStyles.miniButton, GUILayout.Width(80)))
+                  if (GUILayout.Button(nextContent, EditorStyles.miniButton, GUILayout.Width(80)) && searchManager.GoToNextResult())
                   {
-                        if (searchManager.GoToNextResult())
-                        {
-                              ScrollToLine(searchManager.GetCurrentResultLine());
-                        }
+                        ScrollToLine(searchManager.GetCurrentResultLine());
                   }
 
                   GUI.enabled = true;
@@ -266,6 +356,10 @@ namespace OpalStudio.CodePreview.Editor.View
                   GUILayout.FlexibleSpace();
                   EditorGUILayout.EndHorizontal();
             }
+
+#endregion
+
+#region Options
 
             public void DrawOptionsSection()
             {
@@ -349,6 +443,10 @@ namespace OpalStudio.CodePreview.Editor.View
                   EditorGUILayout.EndHorizontal();
             }
 
+#endregion
+
+#region Code Preview
+
             public void DrawCodePreview(string processedContent, string[] lines)
             {
                   EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -368,68 +466,9 @@ namespace OpalStudio.CodePreview.Editor.View
                   EditorGUILayout.EndVertical();
             }
 
-            private void InitializeStyles()
-            {
-                  if (_codeStyle == null || _scrollViewStyle == null || _codeStyle.fontSize != _settings.FontSize)
-                  {
-                        bool isDark = EditorGUIUtility.isProSkin;
-                        Color backgroundColor = isDark ? new Color(0.12f, 0.12f, 0.12f, 1f) : new Color(0.94f, 0.94f, 0.94f, 1f);
+#endregion
 
-                        var backgroundTexture = new Texture2D(1, 1);
-                        backgroundTexture.SetPixel(0, 0, backgroundColor);
-                        backgroundTexture.Apply();
-
-                        _scrollViewStyle = new GUIStyle
-                        {
-                                    normal = { background = backgroundTexture }
-                        };
-
-                        _codeStyle = new GUIStyle(GUI.skin.label)
-                        {
-                                    fontSize = _settings.FontSize,
-                                    richText = true,
-                                    wordWrap = false,
-                                    padding = new RectOffset(10, 10, 5, 5),
-                                    font = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene).font,
-                                    normal = { textColor = isDark ? Color.white : Color.black }
-                        };
-
-                        _codeStyle.hover = _codeStyle.normal;
-                        _codeStyle.active = _codeStyle.normal;
-                        _codeStyle.focused = _codeStyle.normal;
-                  }
-            }
-
-            private void HandleScrollToLine(string[] lines)
-            {
-                  if (_scrollToLineRequested && Event.current.type == EventType.Repaint)
-                  {
-                        _scrollToLineRequested = false;
-
-                        if (lines != null && _targetLineIndex >= 0 && _targetLineIndex < lines.Length)
-                        {
-                              float baseLineHeight = _settings.FontSize * 1.2f;
-                              float paddingPerLine = (_codeStyle.padding.top + _codeStyle.padding.bottom) / 10f;
-                              float calculatedLineHeight = baseLineHeight + paddingPerLine;
-                              float targetY = _targetLineIndex * calculatedLineHeight;
-                              float centeredY = targetY - (_settings.PreviewHeight / 2f);
-                              float totalContentHeight = lines.Length * calculatedLineHeight + _codeStyle.padding.vertical;
-                              float maxScrollY = Mathf.Max(0, totalContentHeight - _settings.PreviewHeight);
-                              _scrollPosition.y = Mathf.Clamp(centeredY, 0, maxScrollY);
-
-                              if (EditorWindow.focusedWindow)
-                              {
-                                    EditorWindow.focusedWindow.Repaint();
-                              }
-                        }
-                  }
-            }
-
-            public void ScrollToLine(int lineIndex)
-            {
-                  _targetLineIndex = lineIndex;
-                  _scrollToLineRequested = true;
-            }
+#region Quick Actions
 
             private static void DrawQuickActions()
             {
@@ -468,12 +507,57 @@ namespace OpalStudio.CodePreview.Editor.View
 
                               if (!string.IsNullOrEmpty(path))
                               {
-                                    EditorGUIUtility.systemCopyBuffer = System.IO.File.ReadAllText(path);
+                                    EditorGUIUtility.systemCopyBuffer = File.ReadAllText(path);
                               }
                         }
                   }
 
                   EditorGUILayout.EndHorizontal();
+            }
+
+#endregion
+
+            private void HandleScrollToLine(string[] lines)
+            {
+                  if (_scrollToLineRequested && Event.current.type == EventType.Repaint)
+                  {
+                        _scrollToLineRequested = false;
+
+                        if (lines != null && _targetLineIndex >= 0 && _targetLineIndex < lines.Length)
+                        {
+                              float baseLineHeight = _settings.FontSize * 1.2f;
+                              float paddingPerLine = (_codeStyle.padding.top + _codeStyle.padding.bottom) / 10f;
+                              float calculatedLineHeight = baseLineHeight + paddingPerLine;
+                              float targetY = _targetLineIndex * calculatedLineHeight;
+                              float centeredY = targetY - (_settings.PreviewHeight / 2f);
+                              float totalContentHeight = lines.Length * calculatedLineHeight + _codeStyle.padding.vertical;
+                              float maxScrollY = Mathf.Max(0, totalContentHeight - _settings.PreviewHeight);
+                              _scrollPosition.y = Mathf.Clamp(centeredY, 0, maxScrollY);
+
+                              if (EditorWindow.focusedWindow)
+                              {
+                                    EditorWindow.focusedWindow.Repaint();
+                              }
+                        }
+                  }
+            }
+
+            public void ScrollToLine(int lineIndex)
+            {
+                  _targetLineIndex = lineIndex;
+                  _scrollToLineRequested = true;
+            }
+
+            private static string GetExtensionForType(ScriptType scriptType)
+            {
+                  return scriptType switch
+                  {
+                              ScriptType.Json => ".json",
+                              ScriptType.XML => ".xml",
+                              ScriptType.Readme => ".md",
+                              ScriptType.Yaml => ".yml",
+                              _ => ""
+                  };
             }
 
             public void Dispose()

@@ -3,10 +3,10 @@
       public enum ScriptType
       {
             CSharp,
-            Shader,
+            Readme,
             Json,
             XML,
-            JavaScript,
+            Yaml,
             Unknown
       }
 }

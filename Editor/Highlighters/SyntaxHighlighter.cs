@@ -20,6 +20,10 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
             public SyntaxHighlighter()
             {
                   _highlighters[ScriptType.CSharp] = new CSharpSyntaxHighlighter();
+                  _highlighters[ScriptType.Json] = new JsonSyntaxHighlighter();
+                  _highlighters[ScriptType.XML] = new XmlSyntaxHighlighter();
+                  _highlighters[ScriptType.Readme] = new ReadmeSyntaxHighlighter();
+                  _highlighters[ScriptType.Yaml] = new YamlSyntaxHighlighter();
 
                   // TODO: Add other highlighters
             }
