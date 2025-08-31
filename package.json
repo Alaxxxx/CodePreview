@@ -1,6 +1,6 @@
 ﻿{
     "name": "com.opalstudio.codepreview",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "displayName": "CodePreview",
     "description": "A Unity package that provides an improved code preview feature for the Unity Editor",
     "unity": "2021.3",
