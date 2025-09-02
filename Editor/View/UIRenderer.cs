@@ -6,6 +6,7 @@ using OpalStudio.CodePreview.Editor.Settings;
 using UnityEditor;
 using UnityEngine;
 using FileInfo = OpalStudio.CodePreview.Editor.Data.FileInfo;
+using Object = UnityEngine.Object;
 
 namespace OpalStudio.CodePreview.Editor.View
 {
@@ -564,7 +565,7 @@ namespace OpalStudio.CodePreview.Editor.View
             {
                   if (_scrollViewStyle?.normal.background != null)
                   {
-                        UnityEngine.Object.DestroyImmediate(_scrollViewStyle.normal.background);
+                        Object.DestroyImmediate(_scrollViewStyle.normal.background);
                   }
             }
       }

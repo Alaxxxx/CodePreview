@@ -2,6 +2,7 @@
 using System.IO;
 using UnityEditor;
 using FileInfo = OpalStudio.CodePreview.Editor.Data.FileInfo;
+using Object = UnityEngine.Object;
 
 namespace OpalStudio.CodePreview.Editor.Helpers
 {
@@ -12,7 +13,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
             private string[] _originalLines;
             private string[] _displayLines;
 
-            public bool CheckForChanges(UnityEngine.Object asset)
+            public bool CheckForChanges(Object asset)
             {
                   string path = AssetDatabase.GetAssetPath(asset);
 
