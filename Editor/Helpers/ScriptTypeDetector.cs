@@ -9,17 +9,17 @@ namespace OpalStudio.CodePreview.Editor.Helpers
       {
             private readonly static Dictionary<string, ScriptType> ExtensionMap = new()
             {
-                        { ".cs", ScriptType.CSharp },
-                        { ".json", ScriptType.Json },
-                        { ".xml", ScriptType.XML },
-                        { ".yml", ScriptType.Yaml },
-                        { ".yaml", ScriptType.Yaml },
+                  { ".cs", ScriptType.CSharp },
+                  { ".json", ScriptType.Json },
+                  { ".xml", ScriptType.XML },
+                  { ".yml", ScriptType.Yaml },
+                  { ".yaml", ScriptType.Yaml },
             };
 
             private readonly static HashSet<string> ReadmeNames = new()
             {
-                        "readme", "README", "Readme", "ReadMe", "README.md", "readme.md",
-                        "Readme.md", "README.txt", "readme.txt", "Readme.txt"
+                  "readme", "README", "Readme", "ReadMe", "README.md", "readme.md",
+                  "Readme.md", "README.txt", "readme.txt", "Readme.txt"
             };
 
             public static ScriptType DetectType(string filePath)
@@ -54,8 +54,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
 
                   string lowerName = fileName.ToLower();
 
-                  return lowerName.StartsWith("readme", StringComparison.OrdinalIgnoreCase) && (lowerName == "readme" ||
-                                                                                                lowerName.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ||
+                  return lowerName.StartsWith("readme", StringComparison.OrdinalIgnoreCase) && (lowerName == "readme" || lowerName.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ||
                                                                                                 lowerName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));
             }
       }

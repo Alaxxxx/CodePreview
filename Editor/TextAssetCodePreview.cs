@@ -7,6 +7,7 @@ using OpalStudio.CodePreview.Editor.Settings;
 using OpalStudio.CodePreview.Editor.View;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using FileInfo = OpalStudio.CodePreview.Editor.Data.FileInfo;
 
 namespace OpalStudio.CodePreview.Editor
@@ -15,15 +16,15 @@ namespace OpalStudio.CodePreview.Editor
       public sealed class TextAssetCodePreview : UnityEditor.Editor
       {
             private UnityEditor.Editor _defaultEditor;
+            private VisualElement _rootElement;
 
             private FileManager _fileManager;
-            private UIRenderer _uiRenderer;
+            private UIToolkitRenderer _uiRenderer;
             private SearchManager _searchManager;
             private PreviewSettings _settings;
             private SyntaxHighlighter _syntaxHighlighter;
 
             private TextAsset _lastAsset;
-            private bool _needsRefresh = true;
 
             private void OnEnable()
             {
@@ -33,6 +34,11 @@ namespace OpalStudio.CodePreview.Editor
                   {
                         _defaultEditor = CreateEditor(target, Type.GetType("UnityEditor.TextAssetInspector, UnityEditor"));
                   }
+                  else
+                  {
+                        InitializeComponents();
+                        _settings.LoadPreferences();
+                  }
             }
 
             private void OnDisable()
@@ -41,28 +47,63 @@ namespace OpalStudio.CodePreview.Editor
                   {
                         DestroyImmediate(_defaultEditor);
                   }
-            }
-
-            public override void OnInspectorGUI()
-            {
-                  GUI.enabled = true;
-
-                  var textAsset = (TextAsset)target;
-
-                  if (IsFileHandled(textAsset))
-                  {
-                        DrawCodePreview(textAsset);
-                  }
                   else
                   {
-                        if (_defaultEditor)
+                        _settings?.SavePreferences();
+
+                        if (_searchManager != null)
                         {
-                              _defaultEditor.OnInspectorGUI();
+                              _searchManager.OnSearchResultsChanged -= OnSearchResultsChanged;
                         }
-                        else
+
+                        if (_settings != null)
                         {
-                              DrawDefaultInspector();
+                              _settings.OnSettingsChanged -= OnSettingsChanged;
                         }
+                  }
+            }
+
+            public override VisualElement CreateInspectorGUI()
+            {
+                  var textAsset = (TextAsset)target;
+
+                  if (!IsFileHandled(textAsset))
+                  {
+                        if (_defaultEditor != null)
+                        {
+                              var root = new VisualElement();
+                              var imguiContainer = new IMGUIContainer(() => _defaultEditor.OnInspectorGUI());
+                              root.Add(imguiContainer);
+
+                              return root;
+                        }
+
+                        return new Label("This text asset type is not supported by CodePreview.");
+                  }
+
+                  _lastAsset = textAsset;
+                  _uiRenderer = new UIToolkitRenderer(_settings, _searchManager, textAsset);
+
+                  RefreshContent(textAsset);
+
+                  _rootElement = _uiRenderer.CreateRootElement(_syntaxHighlighter.GetProcessedContent(), _fileManager.GetFileInfo());
+                  _rootElement.schedule.Execute(CheckForFileChanges).Every(1000);
+
+                  return _rootElement;
+            }
+
+            private void CheckForFileChanges()
+            {
+                  var textAsset = (TextAsset)target;
+
+                  if (textAsset == null || !textAsset)
+                  {
+                        return;
+                  }
+
+                  if (HasFileChanged(AssetDatabase.GetAssetPath(textAsset)))
+                  {
+                        RefreshContent(textAsset);
                   }
             }
 
@@ -74,51 +115,13 @@ namespace OpalStudio.CodePreview.Editor
                   return scriptType != ScriptType.Unknown;
             }
 
-            private void DrawCodePreview(TextAsset textAsset)
-            {
-                  if (_fileManager == null)
-                  {
-                        InitializeComponents();
-                        _settings.LoadPreferences();
-                  }
-
-                  string filePath = AssetDatabase.GetAssetPath(textAsset);
-                  bool hasChanges = HasFileChanged(filePath);
-
-                  if (textAsset != _lastAsset || _needsRefresh || hasChanges)
-                  {
-                        RefreshContent(textAsset);
-                        _lastAsset = textAsset;
-                        _needsRefresh = false;
-                  }
-
-                  if (_searchManager.HasSearchQueryChanged())
-                  {
-                        _searchManager.PerformSearch(_fileManager!.GetLines());
-                        _syntaxHighlighter.UpdateSearchHighlighting(_searchManager.GetSearchQuery(), _searchManager.GetSearchResults());
-                  }
-
-                  ScriptType scriptType = ScriptTypeDetector.DetectType(filePath);
-                  UIRenderer.DrawHeaderForTextAsset(textAsset, _fileManager!.GetFileInfo(), scriptType);
-                  EditorGUILayout.Space(8);
-                  _uiRenderer.DrawSearchSection(_searchManager);
-                  EditorGUILayout.Space(8);
-                  _uiRenderer.DrawOptionsSection();
-                  EditorGUILayout.Space(8);
-                  _uiRenderer.DrawCodePreview(_syntaxHighlighter.GetProcessedContent(), _fileManager.GetLines());
-
-                  GUI.enabled = true;
-            }
-
             private void InitializeComponents()
             {
                   _settings = new PreviewSettings();
                   _fileManager = new FileManager();
                   _searchManager = new SearchManager();
-                  _uiRenderer = new UIRenderer(_settings);
                   _syntaxHighlighter = new SyntaxHighlighter();
 
-                  // Wire up events
                   _searchManager.OnSearchResultsChanged += OnSearchResultsChanged;
                   _settings.OnSettingsChanged += OnSettingsChanged;
             }
@@ -144,18 +147,26 @@ namespace OpalStudio.CodePreview.Editor
 
                         ScriptType scriptType = ScriptTypeDetector.DetectType(filePath);
                         _syntaxHighlighter.ProcessContent(_fileManager.GetDisplayLines(), scriptType, _settings);
+
+                        if (_uiRenderer != null)
+                        {
+                              _uiRenderer.UpdateSearchableContent(_fileManager.GetDisplayLines());
+                        }
+
                         _searchManager.PerformSearch(_fileManager.GetDisplayLines());
+                        _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedContent());
                   }
                   catch (Exception e)
                   {
                         Debug.LogError($"Error refreshing content: {e.Message}");
                         _syntaxHighlighter.SetErrorContent($"Error loading file: {e.Message}");
+                        _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedContent());
                   }
             }
 
             private bool HasFileChanged(string filePath)
             {
-                  if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+                  if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath) || _fileManager == null)
                   {
                         return false;
                   }
@@ -173,17 +184,17 @@ namespace OpalStudio.CodePreview.Editor
             private void OnSearchResultsChanged()
             {
                   _syntaxHighlighter.UpdateSearchHighlighting(_searchManager.GetSearchQuery(), _searchManager.GetSearchResults());
+                  _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedContent());
             }
 
             private void OnSettingsChanged()
             {
-                  _uiRenderer.RefreshStyles();
-
-                  if (_fileManager.HasContent())
+                  if (_fileManager != null && _fileManager.HasContent())
                   {
                         string filePath = AssetDatabase.GetAssetPath(_lastAsset);
                         ScriptType scriptType = ScriptTypeDetector.DetectType(filePath);
                         _syntaxHighlighter.ProcessContent(_fileManager.GetDisplayLines(), scriptType, _settings);
+                        _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedContent());
                   }
             }
       }

@@ -96,7 +96,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
             {
                   var info = new FileInfo
                   {
-                              totalLines = lines.Length
+                        totalLines = lines.Length
                   };
 
                   foreach (string line in lines)
