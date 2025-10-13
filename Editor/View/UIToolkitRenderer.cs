@@ -45,11 +45,6 @@ namespace OpalStudio.CodePreview.Editor.View
 
             public VisualElement CreateRootElement(string processedContent, FileInfo fileInfo)
             {
-                  if (fileInfo != null)
-                  {
-                        _currentLines = new string[fileInfo.totalLines];
-                  }
-
                   var root = new VisualElement
                   {
                         style =

@@ -96,7 +96,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
 
                   for (int i = 0; i < lines.Length; i++)
                   {
-                        if (lines[i].IndexOf(_searchQuery, comparison) >= 0)
+                        if (lines[i] != null && lines[i].IndexOf(_searchQuery, comparison) >= 0)
                         {
                               _searchResults.Add(i);
                         }
