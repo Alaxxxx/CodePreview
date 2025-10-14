@@ -2,15 +2,15 @@
 
 namespace OpalStudio.CodePreview.Editor.Core
 {
-      public abstract class BaseSyntaxHighlighter
+     internal abstract class BaseSyntaxHighlighter
       {
             protected Dictionary<string, string> Colors { get; private set; }
 
-            public abstract void Initialize(bool isDarkTheme);
+            internal abstract void Initialize(bool isDarkTheme);
 
-            public abstract string ProcessLine(string line, bool isInMultiLineComment);
+            internal abstract string ProcessLine(string line, bool isInMultiLineComment);
 
-            public abstract HashSet<int> GetMultiLineCommentLines(string[] lines);
+            internal abstract HashSet<int> GetMultiLineCommentLines(string[] lines);
 
             protected void SetColors(Dictionary<string, string> colors)
             {

@@ -5,7 +5,7 @@ using OpalStudio.CodePreview.Editor.Data;
 
 namespace OpalStudio.CodePreview.Editor.Helpers
 {
-      public static class ScriptTypeDetector
+     internal static class ScriptTypeDetector
       {
             private readonly static Dictionary<string, ScriptType> ExtensionMap = new()
             {
@@ -22,7 +22,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   "Readme.md", "README.txt", "readme.txt", "Readme.txt"
             };
 
-            public static ScriptType DetectType(string filePath)
+           internal static ScriptType DetectType(string filePath)
             {
                   if (string.IsNullOrEmpty(filePath))
                   {

@@ -5,11 +5,11 @@ using OpalStudio.CodePreview.Editor.Core;
 
 namespace OpalStudio.CodePreview.Editor.Highlighters
 {
-      public sealed class ReadmeSyntaxHighlighter : BaseSyntaxHighlighter
+      sealed internal class ReadmeSyntaxHighlighter : BaseSyntaxHighlighter
       {
             private readonly static Dictionary<string, Regex> RegexCache = new();
 
-            public override void Initialize(bool isDarkTheme)
+            internal override void Initialize(bool isDarkTheme)
             {
                   SetColors(new Dictionary<string, string>
                   {
@@ -30,7 +30,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   });
             }
 
-            public override string ProcessLine(string line, bool isInMultiLineComment)
+            internal override string ProcessLine(string line, bool isInMultiLineComment)
             {
                   if (string.IsNullOrEmpty(line))
                   {
@@ -86,7 +86,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   return result;
             }
 
-            public override HashSet<int> GetMultiLineCommentLines(string[] lines)
+            internal override HashSet<int> GetMultiLineCommentLines(string[] lines)
             {
                   var codeBlocks = new HashSet<int>();
                   bool inCodeBlock = false;

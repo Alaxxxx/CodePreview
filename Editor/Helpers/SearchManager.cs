@@ -4,10 +4,10 @@ using System.Linq;
 
 namespace OpalStudio.CodePreview.Editor.Helpers
 {
-      public sealed class SearchManager
+     sealed internal class SearchManager
       {
             // Events
-            public event Action OnSearchResultsChanged;
+           internal event Action OnSearchResultsChanged;
 
             // Search state
             private string _searchQuery = "";
@@ -20,7 +20,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
             private int _goToLine = 1;
 
             // Properties
-            public string SearchQuery
+           internal string SearchQuery
             {
                   get => _searchQuery;
                   set
@@ -32,7 +32,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   }
             }
 
-            public bool CaseSensitiveSearch
+           internal bool CaseSensitiveSearch
             {
                   get => _caseSensitiveSearch;
                   set
@@ -51,28 +51,28 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   }
             }
 
-            public int GoToLine
+           internal int GoToLine
             {
                   get => _goToLine;
                   set => _goToLine = Math.Max(1, value);
             }
 
-            public int CurrentSearchIndex => _currentSearchIndex;
-            public int SearchResultsCount => _searchResults.Count;
-            public HashSet<int> SearchResults => _searchResults;
-            public bool HasSearchResults => _searchResults.Count > 0;
-            public bool HasSearchQuery => !string.IsNullOrEmpty(_searchQuery);
+           internal int CurrentSearchIndex => _currentSearchIndex;
+           internal int SearchResultsCount => _searchResults.Count;
+           internal HashSet<int> SearchResults => _searchResults;
+           internal bool HasSearchResults => _searchResults.Count > 0;
+           internal bool HasSearchQuery => !string.IsNullOrEmpty(_searchQuery);
 
-            public bool HasSearchQueryChanged()
+           internal bool HasSearchQueryChanged()
             {
                   return _searchQuery != _lastProcessedSearchQuery;
             }
 
-            public string GetSearchQuery() => _searchQuery;
+           internal string GetSearchQuery() => _searchQuery;
 
-            public HashSet<int> GetSearchResults() => _searchResults;
+           internal HashSet<int> GetSearchResults() => _searchResults;
 
-            public void PerformSearch(string[] lines)
+           internal void PerformSearch(string[] lines)
             {
                   if (lines == null)
                   {
@@ -111,7 +111,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   OnSearchResultsChanged?.Invoke();
             }
 
-            public void ClearSearch()
+           internal void ClearSearch()
             {
                   _searchQuery = "";
                   _lastProcessedSearchQuery = "";
@@ -120,7 +120,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   OnSearchResultsChanged?.Invoke();
             }
 
-            public int GetCurrentResultLine()
+           internal int GetCurrentResultLine()
             {
                   if (_currentSearchIndex >= 0 && _currentSearchIndex < _searchResults.Count)
                   {
@@ -130,7 +130,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   return -1;
             }
 
-            public bool GoToNextResult()
+           internal bool GoToNextResult()
             {
                   if (_searchResults.Count == 0)
                   {
@@ -143,7 +143,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   return true;
             }
 
-            public bool GoToPreviousResult()
+           internal bool GoToPreviousResult()
             {
                   if (_searchResults.Count == 0)
                   {
@@ -156,7 +156,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   return true;
             }
 
-            public string GetSearchStatusText()
+           internal string GetSearchStatusText()
             {
                   if (!HasSearchQuery)
                   {
@@ -171,13 +171,13 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   return $"({_currentSearchIndex + 1}/{_searchResults.Count})";
             }
 
-            public bool IsCurrentResult(int lineIndex)
+           internal bool IsCurrentResult(int lineIndex)
             {
                   return _currentSearchIndex >= 0 && _currentSearchIndex < _searchResults.Count && _searchResults.ToArray()[_currentSearchIndex] == lineIndex;
             }
 
-            public int GetGoToLineZeroBased() => Math.Max(0, _goToLine - 1);
+           internal int GetGoToLineZeroBased() => Math.Max(0, _goToLine - 1);
 
-            public void SetGoToLine(int lineNumber) => _goToLine = Math.Max(1, lineNumber);
+           internal void SetGoToLine(int lineNumber) => _goToLine = Math.Max(1, lineNumber);
       }
 }

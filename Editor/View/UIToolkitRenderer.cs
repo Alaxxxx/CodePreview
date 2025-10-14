@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 
 namespace OpalStudio.CodePreview.Editor.View
 {
-      public sealed class UIToolkitRenderer
+      sealed internal class UIToolkitRenderer
       {
             private readonly PreviewSettings _settings;
             private readonly SearchManager _searchManager;
@@ -21,9 +21,13 @@ namespace OpalStudio.CodePreview.Editor.View
             private Label _codeLabel;
             private ScrollView _scrollView;
             private Label _searchStatusLabel;
-            private Button _prevButton, _nextButton;
-            private SliderInt _fontSizeSlider, _previewHeightSlider, _maxLinesSlider;
-            private Toggle _lineNumbersToggle, _syntaxHighlightingToggle;
+            private Button _prevButton;
+            private Button _nextButton;
+            private SliderInt _fontSizeSlider;
+            private SliderInt _previewHeightSlider;
+            private SliderInt _maxLinesSlider;
+            private Toggle _lineNumbersToggle;
+            private Toggle _syntaxHighlightingToggle;
             private TextField _searchField;
 
             private string[] _currentLines;
@@ -35,7 +39,7 @@ namespace OpalStudio.CodePreview.Editor.View
             private readonly Font _editorFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
 
-            public UIToolkitRenderer(PreviewSettings settings, SearchManager searchManager, Object target)
+            internal UIToolkitRenderer(PreviewSettings settings, SearchManager searchManager, Object target)
             {
                   _settings = settings;
                   _searchManager = searchManager;
@@ -195,9 +199,9 @@ namespace OpalStudio.CodePreview.Editor.View
                   });
 
                   var row1 = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 6 } };
-                  var l1 = new Label($"📄 {fileInfo.totalLines} lines");
-                  var w1 = new Label($"📝 {fileInfo.totalWords} words");
-                  var c1 = new Label($"🔤 {fileInfo.totalChars} chars");
+                  var l1 = new Label($"📄 {fileInfo.TotalLines} lines");
+                  var w1 = new Label($"📝 {fileInfo.TotalWords} words");
+                  var c1 = new Label($"🔤 {fileInfo.TotalChars} chars");
                   baseLabelStyle(l1);
                   baseLabelStyle(w1);
                   baseLabelStyle(c1);
@@ -207,7 +211,7 @@ namespace OpalStudio.CodePreview.Editor.View
 
                   var row2 = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
                   var s2 = new Label($"💾 {fileInfo.FormattedSize}");
-                  var com2 = new Label($"💬 {fileInfo.commentLines} comments");
+                  var com2 = new Label($"💬 {fileInfo.CommentLines} comments");
                   var mod2 = new Label($"🕐 {fileInfo.LastModifiedTime:MM/dd HH:mm}");
                   baseLabelStyle(s2);
                   baseLabelStyle(com2);
@@ -256,7 +260,7 @@ namespace OpalStudio.CodePreview.Editor.View
                   var searchFieldRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10 } };
                   var findLabel = new Label("Find:") { style = { width = 50, marginRight = 8 } };
 
-                  _searchField = new TextField()
+                  _searchField = new TextField
                   {
                         value = _searchManager.SearchQuery,
                         style = { flexGrow = 1, marginRight = 10 }
@@ -333,7 +337,7 @@ namespace OpalStudio.CodePreview.Editor.View
 
                   var goToRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                   var goToLabel = new Label("Go to Line:") { style = { width = 80, marginRight = 8 } };
-                  var goToField = new IntegerField() { value = _searchManager.GoToLine, style = { width = 80, marginRight = 8 } };
+                  var goToField = new IntegerField { value = _searchManager.GoToLine, style = { width = 80, marginRight = 8 } };
                   goToField.RegisterValueChangedCallback(evt => _searchManager.GoToLine = evt.newValue);
                   var goButton = new Button(() => ScrollToLine(_searchManager.GetGoToLineZeroBased())) { text = "Go", style = { width = 50 } };
 
@@ -560,7 +564,7 @@ namespace OpalStudio.CodePreview.Editor.View
                   }
             }
 
-            public void UpdateCodeContent(string newContent)
+            internal void UpdateCodeContent(string newContent)
             {
                   if (_codeLabel != null)
                   {
@@ -568,7 +572,7 @@ namespace OpalStudio.CodePreview.Editor.View
                   }
             }
 
-            public void UpdateSearchableContent(string[] lines)
+            internal void UpdateSearchableContent(string[] lines)
             {
                   _currentLines = lines;
 
@@ -637,11 +641,9 @@ namespace OpalStudio.CodePreview.Editor.View
                   _ => ("Text File", Color.gray)
             };
 
-            private static GUIContent GetIconForType(ScriptType scriptType) => scriptType switch
-            {
-                  ScriptType.Json or ScriptType.XML or ScriptType.Readme or ScriptType.Yaml => EditorGUIUtility.IconContent("TextAsset Icon"),
-                  _ => EditorGUIUtility.IconContent("DefaultAsset Icon")
-            };
+            private static GUIContent GetIconForType(ScriptType scriptType) => scriptType is ScriptType.Json or ScriptType.XML or ScriptType.Readme or ScriptType.Yaml
+                  ? EditorGUIUtility.IconContent("TextAsset Icon")
+                  : EditorGUIUtility.IconContent("DefaultAsset Icon");
 
             private static string GetExtensionForType(ScriptType scriptType) => scriptType switch
             {

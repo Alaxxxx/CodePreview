@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace OpalStudio.CodePreview.Editor.Highlighters
 {
-      public sealed class SyntaxHighlighter
+      sealed internal class SyntaxHighlighter
       {
             private readonly Dictionary<ScriptType, BaseSyntaxHighlighter> _highlighters = new();
             private string _processedContent = "";
@@ -17,7 +17,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
             private HashSet<int> _searchResults = new();
             private string _searchQuery = "";
 
-            public SyntaxHighlighter()
+            internal SyntaxHighlighter()
             {
                   _highlighters[ScriptType.CSharp] = new CSharpSyntaxHighlighter();
                   _highlighters[ScriptType.Json] = new JsonSyntaxHighlighter();
@@ -28,7 +28,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   // TODO: Add other highlighters
             }
 
-            public void ProcessContent(string[] lines, ScriptType scriptType, PreviewSettings settings)
+            internal void ProcessContent(string[] lines, ScriptType scriptType, PreviewSettings settings)
             {
                   if (lines == null || lines.Length == 0)
                   {
@@ -124,7 +124,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   return Regex.Replace(line, escapedTerm, $"<mark={highlightColor}><color={textColor}><b>$0</b></color></mark>", RegexOptions.IgnoreCase);
             }
 
-            public void UpdateSearchHighlighting(string searchQuery, HashSet<int> searchResults)
+            internal void UpdateSearchHighlighting(string searchQuery, HashSet<int> searchResults)
             {
                   _searchQuery = searchQuery;
                   _searchResults = searchResults;
@@ -136,9 +136,9 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   }
             }
 
-            public string GetProcessedContent() => _processedContent;
+            internal string GetProcessedContent() => _processedContent;
 
-            public void SetErrorContent(string errorMessage)
+            internal void SetErrorContent(string errorMessage)
             {
                   _processedContent = $"<color=red>{errorMessage}</color>";
             }

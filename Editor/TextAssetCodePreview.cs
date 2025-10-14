@@ -13,7 +13,7 @@ using FileInfo = OpalStudio.CodePreview.Editor.Data.FileInfo;
 namespace OpalStudio.CodePreview.Editor
 {
       [CustomEditor(typeof(TextAsset), true)]
-      public sealed class TextAssetCodePreview : UnityEditor.Editor
+      sealed internal class TextAssetCodePreview : UnityEditor.Editor
       {
             private UnityEditor.Editor _defaultEditor;
             private VisualElement _rootElement;

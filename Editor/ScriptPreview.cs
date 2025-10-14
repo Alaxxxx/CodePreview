@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 namespace OpalStudio.CodePreview.Editor
 {
       [CustomEditor(typeof(MonoScript))]
-      public sealed class ScriptPreview : UnityEditor.Editor
+      sealed internal class ScriptPreview : UnityEditor.Editor
       {
             private FileManager _fileManager;
             private UIToolkitRenderer _uiRenderer;

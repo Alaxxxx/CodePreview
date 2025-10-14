@@ -6,14 +6,14 @@ using Object = UnityEngine.Object;
 
 namespace OpalStudio.CodePreview.Editor.Helpers
 {
-      public sealed class FileManager
+     sealed internal class FileManager
       {
             private string _filePath;
             private FileInfo _fileInfo;
             private string[] _originalLines;
             private string[] _displayLines;
 
-            public bool CheckForChanges(Object asset)
+           internal bool CheckForChanges(Object asset)
             {
                   string path = AssetDatabase.GetAssetPath(asset);
 
@@ -32,7 +32,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   return true;
             }
 
-            public void LoadScript(MonoScript script)
+           internal void LoadScript(MonoScript script)
             {
                   _filePath = AssetDatabase.GetAssetPath(script);
 
@@ -49,7 +49,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
 
                         _fileInfo = CalculateFileInfo(_originalLines);
                         _fileInfo.LastModifiedTime = File.GetLastWriteTime(_filePath);
-                        _fileInfo.fileSize = new System.IO.FileInfo(_filePath).Length;
+                        _fileInfo.FileSize = new System.IO.FileInfo(_filePath).Length;
                   }
                   catch (Exception e)
                   {
@@ -57,7 +57,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   }
             }
 
-            public void LoadFromContent(string[] lines, string filePath)
+           internal void LoadFromContent(string[] lines, string filePath)
             {
                   _filePath = filePath;
                   _originalLines = lines;
@@ -68,48 +68,48 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   if (!string.IsNullOrEmpty(_filePath) && File.Exists(_filePath))
                   {
                         _fileInfo.LastModifiedTime = File.GetLastWriteTime(_filePath);
-                        _fileInfo.fileSize = new System.IO.FileInfo(_filePath).Length;
+                        _fileInfo.FileSize = new System.IO.FileInfo(_filePath).Length;
                   }
                   else
                   {
                         _fileInfo.LastModifiedTime = DateTimeOffset.UtcNow;
-                        _fileInfo.fileSize = string.Join("\n", lines).Length;
+                        _fileInfo.FileSize = string.Join("\n", lines).Length;
                   }
             }
 
-            public void SetLimitedLines(string[] limitedLines)
+           internal void SetLimitedLines(string[] limitedLines)
             {
                   _displayLines = limitedLines;
             }
 
-            public string[] GetLines() => _originalLines;
+           internal string[] GetLines() => _originalLines;
 
-            public string[] GetDisplayLines() => _displayLines;
+           internal string[] GetDisplayLines() => _displayLines;
 
-            public string GetFilePath() => _filePath;
+           internal string GetFilePath() => _filePath;
 
-            public FileInfo GetFileInfo() => _fileInfo;
+           internal FileInfo GetFileInfo() => _fileInfo;
 
-            public bool HasContent() => _originalLines is { Length: > 0 };
+           internal bool HasContent() => _originalLines is { Length: > 0 };
 
             private static FileInfo CalculateFileInfo(string[] lines)
             {
                   var info = new FileInfo
                   {
-                        totalLines = lines.Length
+                        TotalLines = lines.Length
                   };
 
                   foreach (string line in lines)
                   {
-                        info.totalChars += line.Length;
-                        info.totalWords += line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                        info.TotalChars += line.Length;
+                        info.TotalWords += line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
 
                         string trimmed = line.TrimStart();
 
                         if (trimmed.StartsWith("//", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("/*", StringComparison.OrdinalIgnoreCase) ||
                             trimmed.StartsWith("*", StringComparison.OrdinalIgnoreCase) || trimmed.Contains("*/", StringComparison.OrdinalIgnoreCase))
                         {
-                              info.commentLines++;
+                              info.CommentLines++;
                         }
                   }
 

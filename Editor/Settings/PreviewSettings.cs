@@ -5,7 +5,7 @@ using UnityEngine;
 namespace OpalStudio.CodePreview.Editor.Settings
 {
       [Serializable]
-      public class PreviewSettings
+      internal class PreviewSettings
       {
             // EditorPrefs keys
             private const string PrefFontSize = "EnhancedScriptPreview_FontSize";
@@ -17,10 +17,10 @@ namespace OpalStudio.CodePreview.Editor.Settings
             private const string PrefEnableSyntaxHighlighting = "EnhancedScriptPreview_EnableSyntaxHighlighting";
 
             // Events
-            public event Action OnSettingsChanged;
+            internal event Action OnSettingsChanged;
 
             private int _fontSize = 11;
-            public int FontSize
+            internal int FontSize
             {
                   get => _fontSize;
                   set
@@ -35,7 +35,7 @@ namespace OpalStudio.CodePreview.Editor.Settings
             }
 
             private int _previewHeight = 400;
-            public int PreviewHeight
+            internal int PreviewHeight
             {
                   get => _previewHeight;
                   set
@@ -50,7 +50,7 @@ namespace OpalStudio.CodePreview.Editor.Settings
             }
 
             private bool _showLineNumbers = true;
-            public bool ShowLineNumbers
+            internal bool ShowLineNumbers
             {
                   get => _showLineNumbers;
                   set
@@ -65,7 +65,7 @@ namespace OpalStudio.CodePreview.Editor.Settings
             }
 
             private bool _searchFoldout = true;
-            public bool SearchFoldout
+            internal bool SearchFoldout
             {
                   get => _searchFoldout;
                   set
@@ -79,7 +79,7 @@ namespace OpalStudio.CodePreview.Editor.Settings
             }
 
             private bool _optionsFoldout;
-            public bool OptionsFoldout
+            internal bool OptionsFoldout
             {
                   get => _optionsFoldout;
                   set
@@ -93,7 +93,7 @@ namespace OpalStudio.CodePreview.Editor.Settings
             }
 
             private int _maxLinesToDisplay = 1000;
-            public int MaxLinesToDisplay
+            internal int MaxLinesToDisplay
             {
                   get => _maxLinesToDisplay;
                   set
@@ -108,7 +108,7 @@ namespace OpalStudio.CodePreview.Editor.Settings
             }
 
             private bool _enableSyntaxHighlighting = true;
-            public bool EnableSyntaxHighlighting
+            internal bool EnableSyntaxHighlighting
             {
                   get => _enableSyntaxHighlighting;
                   set
@@ -122,9 +122,9 @@ namespace OpalStudio.CodePreview.Editor.Settings
                   }
             }
 
-            public bool IsDarkTheme => EditorGUIUtility.isProSkin;
+            internal bool IsDarkTheme => EditorGUIUtility.isProSkin;
 
-            public void LoadPreferences()
+            internal void LoadPreferences()
             {
                   _fontSize = EditorPrefs.GetInt(PrefFontSize, 11);
                   _previewHeight = EditorPrefs.GetInt(PrefPreviewHeight, 400);
@@ -135,7 +135,7 @@ namespace OpalStudio.CodePreview.Editor.Settings
                   _enableSyntaxHighlighting = EditorPrefs.GetBool(PrefEnableSyntaxHighlighting, true);
             }
 
-            public void SavePreferences()
+            internal void SavePreferences()
             {
                   EditorPrefs.SetInt(PrefFontSize, _fontSize);
                   EditorPrefs.SetInt(PrefPreviewHeight, _previewHeight);
@@ -146,7 +146,7 @@ namespace OpalStudio.CodePreview.Editor.Settings
                   EditorPrefs.SetBool(PrefEnableSyntaxHighlighting, _enableSyntaxHighlighting);
             }
 
-            public void ResetToDefaults()
+            internal void ResetToDefaults()
             {
                   FontSize = 11;
                   PreviewHeight = 400;
@@ -157,12 +157,12 @@ namespace OpalStudio.CodePreview.Editor.Settings
                   EnableSyntaxHighlighting = true;
             }
 
-            public bool ShouldUseSyntaxHighlighting(int lineCount)
+            internal bool ShouldUseSyntaxHighlighting(int lineCount)
             {
                   return _enableSyntaxHighlighting && lineCount <= _maxLinesToDisplay;
             }
 
-            public bool ShouldLimitContent(int lineCount)
+            internal bool ShouldLimitContent(int lineCount)
             {
                   return lineCount > _maxLinesToDisplay;
             }
