@@ -13,14 +13,14 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
             {
                   SetColors(new Dictionary<string, string>
                   {
-                              ["tagName"] = isDarkTheme ? "#569CD6" : "#0000FF",
-                              ["attributeName"] = isDarkTheme ? "#9CDCFE" : "#FF0000",
-                              ["attributeValue"] = isDarkTheme ? "#CE9178" : "#0000FF",
-                              ["xmlDeclaration"] = isDarkTheme ? "#C586C0" : "#9B59B6",
-                              ["comment"] = isDarkTheme ? "#6A9955" : "#008000",
-                              ["cdata"] = isDarkTheme ? "#DCDCAA" : "#795E26",
-                              ["bracket"] = "#808080",
-                              ["text"] = isDarkTheme ? "#D4D4D4" : "#000000"
+                        ["tagName"] = isDarkTheme ? "#569CD6" : "#0000FF",
+                        ["attributeName"] = isDarkTheme ? "#9CDCFE" : "#FF0000",
+                        ["attributeValue"] = isDarkTheme ? "#CE9178" : "#0000FF",
+                        ["xmlDeclaration"] = isDarkTheme ? "#C586C0" : "#9B59B6",
+                        ["comment"] = isDarkTheme ? "#6A9955" : "#008000",
+                        ["cdata"] = isDarkTheme ? "#DCDCAA" : "#795E26",
+                        ["bracket"] = "#808080",
+                        ["text"] = isDarkTheme ? "#D4D4D4" : "#000000"
                   });
             }
 
@@ -149,8 +149,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                         string quote = match.Groups[4].Value;
                         string attrValue = match.Groups[5].Value;
 
-                        return whitespace + ApplyColorTag(attrName, this.Colors["attributeName"]) + equals +
-                               ApplyColorTag(quote + attrValue + quote, this.Colors["attributeValue"]);
+                        return whitespace + ApplyColorTag(attrName, this.Colors["attributeName"]) + equals + ApplyColorTag(quote + attrValue + quote, this.Colors["attributeValue"]);
                   });
             }
 

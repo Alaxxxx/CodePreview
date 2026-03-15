@@ -18,7 +18,7 @@ namespace OpalStudio.CodePreview.Editor.View
             private readonly MonoScript _monoScriptTarget;
             private readonly TextAsset _textAssetTarget;
 
-            private Label _codeLabel;
+            private VisualElement _linesContainer;
             private ScrollView _scrollView;
             private Label _searchStatusLabel;
             private Button _prevButton;
@@ -38,7 +38,6 @@ namespace OpalStudio.CodePreview.Editor.View
             private readonly Color _sectionBackgroundColor = EditorGUIUtility.isProSkin ? new Color(0.18f, 0.18f, 0.18f) : new Color(0.88f, 0.88f, 0.88f);
             private readonly Font _editorFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
-
             internal UIToolkitRenderer(PreviewSettings settings, SearchManager searchManager, Object target)
             {
                   _settings = settings;
@@ -47,16 +46,14 @@ namespace OpalStudio.CodePreview.Editor.View
                   _textAssetTarget = target as TextAsset;
             }
 
-            public VisualElement CreateRootElement(string processedContent, FileInfo fileInfo)
+            public VisualElement CreateRootElement(string[] processedLines, FileInfo fileInfo)
             {
                   var root = new VisualElement
                   {
                         style =
                         {
-                              paddingTop = 15,
-                              paddingBottom = 15,
-                              paddingLeft = 15,
-                              paddingRight = 15,
+                              paddingTop = 15, paddingBottom = 15,
+                              paddingLeft = 15, paddingRight = 15,
                               flexGrow = 1
                         }
                   };
@@ -67,12 +64,139 @@ namespace OpalStudio.CodePreview.Editor.View
                   root.Add(CreateSpacer(15));
                   root.Add(CreateOptionsSection());
                   root.Add(CreateSpacer(15));
-                  root.Add(CreateCodePreviewSection(processedContent));
+                  root.Add(CreateCodePreviewSection(processedLines));
 
                   _settings.OnSettingsChanged += UpdateStyles;
                   _searchManager.OnSearchResultsChanged += UpdateSearchStatus;
 
                   return root;
+            }
+
+            private VisualElement CreateCodePreviewSection(string[] processedLines)
+            {
+                  var container = new VisualElement();
+
+                  _linesContainer = new VisualElement
+                  {
+                        style =
+                        {
+                              paddingLeft = 15,
+                              paddingRight = 15,
+                              paddingTop = 12,
+                              paddingBottom = 12,
+                        }
+                  };
+
+                  RebuildLines(processedLines);
+
+                  _scrollView = new ScrollView(ScrollViewMode.VerticalAndHorizontal)
+                  {
+                        horizontalScrollerVisibility = ScrollerVisibility.Auto,
+                        verticalScrollerVisibility = ScrollerVisibility.Auto,
+                        style =
+                        {
+                              height = _settings.PreviewHeight,
+                              backgroundColor = _codeBackgroundColor,
+                              borderBottomColor = _borderColor,
+                              borderTopColor = _borderColor,
+                              borderLeftColor = _borderColor,
+                              borderRightColor = _borderColor,
+                              borderBottomWidth = 1,
+                              borderTopWidth = 1,
+                              borderLeftWidth = 1,
+                              borderRightWidth = 1,
+                              borderBottomLeftRadius = 6,
+                              borderBottomRightRadius = 6,
+                              borderTopLeftRadius = 6,
+                              borderTopRightRadius = 6,
+                        }
+                  };
+                  _scrollView.Add(_linesContainer);
+
+                  var quickActions = new VisualElement
+                  {
+                        style =
+                        {
+                              flexDirection = FlexDirection.Row,
+                              justifyContent = Justify.SpaceBetween,
+                              marginTop = 12
+                        }
+                  };
+
+                  var editBtn = new Button(static () => AssetDatabase.OpenAsset(Selection.activeObject)) { text = "📝 Edit", style = { flexGrow = 1, marginRight = 6 } };
+                  var showBtn = new Button(static () => EditorGUIUtility.PingObject(Selection.activeObject)) { text = "📁 Show", style = { flexGrow = 1, marginRight = 6 } };
+
+                  var copyPathBtn = new Button(static () => EditorGUIUtility.systemCopyBuffer = AssetDatabase.GetAssetPath(Selection.activeObject))
+                        { text = "📋 Copy Path", style = { flexGrow = 1, marginRight = 6 } };
+
+                  var copyCodeBtn = new Button(static () =>
+                  {
+                        string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+
+                        if (!string.IsNullOrEmpty(path))
+                        {
+                              EditorGUIUtility.systemCopyBuffer = File.ReadAllText(path);
+                        }
+                  }) { text = "📄 Copy Code", style = { flexGrow = 1 } };
+
+                  quickActions.Add(editBtn);
+                  quickActions.Add(showBtn);
+                  quickActions.Add(copyPathBtn);
+                  quickActions.Add(copyCodeBtn);
+
+                  container.Add(_scrollView);
+                  container.Add(quickActions);
+
+                  UpdateStyles();
+
+                  return container;
+            }
+
+            private void RebuildLines(string[] processedLines)
+            {
+                  _linesContainer.Clear();
+
+                  if (processedLines == null)
+                  {
+                        return;
+                  }
+
+                  foreach (string line in processedLines)
+                  {
+                        var label = new Label(line)
+                        {
+                              enableRichText = true,
+                              style =
+                              {
+                                    unityFont = _editorFont,
+                                    fontSize = _settings.FontSize,
+                                    color = new Color(0.85f, 0.85f, 0.85f),
+
+                                    whiteSpace = WhiteSpace.NoWrap,
+                              }
+                        };
+                        _linesContainer.Add(label);
+                  }
+            }
+
+            internal void UpdateCodeContent(string[] processedLines)
+            {
+                  if (_linesContainer == null)
+                  {
+                        return;
+                  }
+
+                  RebuildLines(processedLines);
+            }
+
+            internal void UpdateSearchableContent(string[] lines)
+            {
+                  _currentLines = lines;
+
+                  if (_searchManager.HasSearchQuery)
+                  {
+                        _searchManager.PerformSearch(_currentLines);
+                  }
             }
 
             private VisualElement CreateHeader(FileInfo fileInfo)
@@ -86,34 +210,18 @@ namespace OpalStudio.CodePreview.Editor.View
                               borderTopColor = _borderColor,
                               borderLeftColor = _borderColor,
                               borderRightColor = _borderColor,
-                              borderBottomWidth = 1,
-                              borderTopWidth = 1,
-                              borderLeftWidth = 1,
-                              borderRightWidth = 1,
-                              borderBottomLeftRadius = 6,
-                              borderBottomRightRadius = 6,
-                              borderTopLeftRadius = 6,
-                              borderTopRightRadius = 6,
-                              paddingBottom = 15,
-                              paddingTop = 15,
-                              paddingLeft = 15,
-                              paddingRight = 15
+                              borderBottomWidth = 1, borderTopWidth = 1,
+                              borderLeftWidth = 1, borderRightWidth = 1,
+                              borderBottomLeftRadius = 6, borderBottomRightRadius = 6,
+                              borderTopLeftRadius = 6, borderTopRightRadius = 6,
+                              paddingBottom = 15, paddingTop = 15,
+                              paddingLeft = 15, paddingRight = 15
                         }
                   };
 
                   var topRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-
                   var icon = new Image { style = { width = 18, height = 18, marginRight = 8 } };
-
-                  var title = new Label
-                  {
-                        style =
-                        {
-                              unityFontStyleAndWeight = FontStyle.Bold,
-                              fontSize = 15,
-                              flexGrow = 1
-                        }
-                  };
+                  var title = new Label { style = { unityFontStyleAndWeight = FontStyle.Bold, fontSize = 15, flexGrow = 1 } };
 
                   if (_monoScriptTarget != null)
                   {
@@ -131,15 +239,11 @@ namespace OpalStudio.CodePreview.Editor.View
                   {
                         style =
                         {
-                              paddingLeft = 10,
-                              paddingRight = 10,
-                              paddingTop = 4,
-                              paddingBottom = 4,
+                              paddingLeft = 10, paddingRight = 10,
+                              paddingTop = 4, paddingBottom = 4,
                               backgroundColor = EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f),
-                              borderBottomLeftRadius = 4,
-                              borderBottomRightRadius = 4,
-                              borderTopLeftRadius = 4,
-                              borderTopRightRadius = 4,
+                              borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
+                              borderTopLeftRadius = 4, borderTopRightRadius = 4,
                               fontSize = 11,
                               unityFontStyleAndWeight = FontStyle.Bold
                         }
@@ -161,7 +265,6 @@ namespace OpalStudio.CodePreview.Editor.View
                   topRow.Add(icon);
                   topRow.Add(title);
                   topRow.Add(typeLabel);
-
                   headerBox.Add(topRow);
 
                   if (fileInfo != null)
@@ -180,14 +283,10 @@ namespace OpalStudio.CodePreview.Editor.View
                         style =
                         {
                               backgroundColor = EditorGUIUtility.isProSkin ? new Color(0.15f, 0.15f, 0.15f, 0.5f) : new Color(0.85f, 0.85f, 0.85f, 0.5f),
-                              paddingTop = 10,
-                              paddingBottom = 10,
-                              paddingLeft = 12,
-                              paddingRight = 12,
-                              borderBottomLeftRadius = 4,
-                              borderBottomRightRadius = 4,
-                              borderTopLeftRadius = 4,
-                              borderTopRightRadius = 4
+                              paddingTop = 10, paddingBottom = 10,
+                              paddingLeft = 12, paddingRight = 12,
+                              borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
+                              borderTopLeftRadius = 4, borderTopRightRadius = 4
                         }
                   };
 
@@ -235,36 +334,23 @@ namespace OpalStudio.CodePreview.Editor.View
                         style =
                         {
                               backgroundColor = _sectionBackgroundColor,
-                              paddingLeft = 12,
-                              paddingRight = 12,
-                              paddingTop = 8,
-                              paddingBottom = 8,
-                              borderBottomLeftRadius = 6,
-                              borderBottomRightRadius = 6,
-                              borderTopLeftRadius = 6,
-                              borderTopRightRadius = 6,
-                              borderBottomColor = _borderColor,
-                              borderTopColor = _borderColor,
-                              borderLeftColor = _borderColor,
-                              borderRightColor = _borderColor,
-                              borderBottomWidth = 1,
-                              borderTopWidth = 1,
-                              borderLeftWidth = 1,
-                              borderRightWidth = 1
+                              paddingLeft = 12, paddingRight = 12,
+                              paddingTop = 8, paddingBottom = 8,
+                              borderBottomLeftRadius = 6, borderBottomRightRadius = 6,
+                              borderTopLeftRadius = 6, borderTopRightRadius = 6,
+                              borderBottomColor = _borderColor, borderTopColor = _borderColor,
+                              borderLeftColor = _borderColor, borderRightColor = _borderColor,
+                              borderBottomWidth = 1, borderTopWidth = 1,
+                              borderLeftWidth = 1, borderRightWidth = 1
                         }
                   };
                   searchFoldout.RegisterValueChangedCallback(evt => _settings.SearchFoldout = evt.newValue);
 
                   var content = new VisualElement { style = { paddingTop = 10 } };
-
                   var searchFieldRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10 } };
                   var findLabel = new Label("Find:") { style = { width = 50, marginRight = 8 } };
 
-                  _searchField = new TextField
-                  {
-                        value = _searchManager.SearchQuery,
-                        style = { flexGrow = 1, marginRight = 10 }
-                  };
+                  _searchField = new TextField { value = _searchManager.SearchQuery, style = { flexGrow = 1, marginRight = 10 } };
 
                   _searchField.RegisterValueChangedCallback(evt =>
                   {
@@ -312,18 +398,11 @@ namespace OpalStudio.CodePreview.Editor.View
                         }
                   }) { text = "Next ▶" };
                   _nextButton.SetEnabled(_searchManager.HasSearchResults);
+
                   navButtons.Add(_prevButton);
                   navButtons.Add(_nextButton);
 
-                  _searchStatusLabel = new Label(_searchManager.GetSearchStatusText())
-                  {
-                        style =
-                        {
-                              flexGrow = 1,
-                              unityTextAlign = TextAnchor.MiddleLeft,
-                              marginLeft = 10
-                        }
-                  };
+                  _searchStatusLabel = new Label(_searchManager.GetSearchStatusText()) { style = { flexGrow = 1, unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 10 } };
 
                   var clearButton = new Button(() =>
                   {
@@ -362,41 +441,25 @@ namespace OpalStudio.CodePreview.Editor.View
                         style =
                         {
                               backgroundColor = _sectionBackgroundColor,
-                              paddingLeft = 12,
-                              paddingRight = 12,
-                              paddingTop = 8,
-                              paddingBottom = 8,
-                              borderBottomLeftRadius = 6,
-                              borderBottomRightRadius = 6,
-                              borderTopLeftRadius = 6,
-                              borderTopRightRadius = 6,
-                              borderBottomColor = _borderColor,
-                              borderTopColor = _borderColor,
-                              borderLeftColor = _borderColor,
-                              borderRightColor = _borderColor,
-                              borderBottomWidth = 1,
-                              borderTopWidth = 1,
-                              borderLeftWidth = 1,
-                              borderRightWidth = 1
+                              paddingLeft = 12, paddingRight = 12,
+                              paddingTop = 8, paddingBottom = 8,
+                              borderBottomLeftRadius = 6, borderBottomRightRadius = 6,
+                              borderTopLeftRadius = 6, borderTopRightRadius = 6,
+                              borderBottomColor = _borderColor, borderTopColor = _borderColor,
+                              borderLeftColor = _borderColor, borderRightColor = _borderColor,
+                              borderBottomWidth = 1, borderTopWidth = 1,
+                              borderLeftWidth = 1, borderRightWidth = 1
                         }
                   };
                   optionsFoldout.RegisterValueChangedCallback(evt => _settings.OptionsFoldout = evt.newValue);
 
                   var content = new VisualElement { style = { paddingTop = 10 } };
-
                   var togglesContainer = new VisualElement { style = { marginBottom = 12 } };
 
-                  _lineNumbersToggle = new Toggle("Show Line Numbers")
-                  {
-                        value = _settings.ShowLineNumbers,
-                        style = { marginBottom = 8 }
-                  };
+                  _lineNumbersToggle = new Toggle("Show Line Numbers") { value = _settings.ShowLineNumbers, style = { marginBottom = 8 } };
                   _lineNumbersToggle.RegisterValueChangedCallback(evt => _settings.ShowLineNumbers = evt.newValue);
 
-                  _syntaxHighlightingToggle = new Toggle("Enable Syntax Highlighting")
-                  {
-                        value = _settings.EnableSyntaxHighlighting
-                  };
+                  _syntaxHighlightingToggle = new Toggle("Enable Syntax Highlighting") { value = _settings.EnableSyntaxHighlighting };
                   _syntaxHighlightingToggle.RegisterValueChangedCallback(evt => _settings.EnableSyntaxHighlighting = evt.newValue);
 
                   togglesContainer.Add(_lineNumbersToggle);
@@ -426,7 +489,6 @@ namespace OpalStudio.CodePreview.Editor.View
                   var resetButton = new Button(() =>
                   {
                         _settings.ResetToDefaults();
-
                         _lineNumbersToggle.value = _settings.ShowLineNumbers;
                         _syntaxHighlightingToggle.value = _settings.EnableSyntaxHighlighting;
                         _fontSizeSlider.value = _settings.FontSize;
@@ -444,159 +506,53 @@ namespace OpalStudio.CodePreview.Editor.View
                   return optionsFoldout;
             }
 
-            private VisualElement CreateCodePreviewSection(string processedContent)
-            {
-                  var container = new VisualElement();
-
-                  _codeLabel = new Label(processedContent)
-                  {
-                        enableRichText = true,
-                        style =
-                        {
-                              paddingLeft = 15,
-                              paddingRight = 15,
-                              paddingTop = 12,
-                              paddingBottom = 12,
-                              unityFont = _editorFont,
-                              color = new Color(0.85f, 0.85f, 0.85f)
-                        }
-                  };
-
-                  _scrollView = new ScrollView(ScrollViewMode.VerticalAndHorizontal)
-                  {
-                        horizontalScrollerVisibility = ScrollerVisibility.Auto,
-                        verticalScrollerVisibility = ScrollerVisibility.Auto,
-                        style =
-                        {
-                              height = _settings.PreviewHeight,
-                              backgroundColor = _codeBackgroundColor,
-                              borderBottomColor = _borderColor,
-                              borderTopColor = _borderColor,
-                              borderLeftColor = _borderColor,
-                              borderRightColor = _borderColor,
-                              borderBottomWidth = 1,
-                              borderTopWidth = 1,
-                              borderLeftWidth = 1,
-                              borderRightWidth = 1,
-                              borderBottomLeftRadius = 6,
-                              borderBottomRightRadius = 6,
-                              borderTopLeftRadius = 6,
-                              borderTopRightRadius = 6,
-                        }
-                  };
-                  _scrollView.Add(_codeLabel);
-
-                  var quickActions = new VisualElement
-                  {
-                        style =
-                        {
-                              flexDirection = FlexDirection.Row,
-                              justifyContent = Justify.SpaceBetween,
-                              marginTop = 12
-                        }
-                  };
-
-                  var editBtn = new Button(static () => AssetDatabase.OpenAsset(Selection.activeObject))
-                  {
-                        text = "📝 Edit",
-                        style = { flexGrow = 1, marginRight = 6 }
-                  };
-
-                  var showBtn = new Button(static () => EditorGUIUtility.PingObject(Selection.activeObject))
-                  {
-                        text = "📁 Show",
-                        style = { flexGrow = 1, marginRight = 6 }
-                  };
-
-                  var copyPathBtn = new Button(static () => EditorGUIUtility.systemCopyBuffer = AssetDatabase.GetAssetPath(Selection.activeObject))
-                  {
-                        text = "📋 Copy Path",
-                        style = { flexGrow = 1, marginRight = 6 }
-                  };
-
-                  var copyCodeBtn = new Button(static () =>
-                  {
-                        string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-
-                        if (!string.IsNullOrEmpty(path))
-                        {
-                              EditorGUIUtility.systemCopyBuffer = File.ReadAllText(path);
-                        }
-                  })
-                  {
-                        text = "📄 Copy Code",
-                        style = { flexGrow = 1 }
-                  };
-
-                  quickActions.Add(editBtn);
-                  quickActions.Add(showBtn);
-                  quickActions.Add(copyPathBtn);
-                  quickActions.Add(copyCodeBtn);
-
-                  container.Add(_scrollView);
-                  container.Add(quickActions);
-
-                  UpdateStyles();
-
-                  return container;
-            }
-
             private void UpdateStyles()
             {
-                  if (_codeLabel != null)
-                  {
-                        _codeLabel.style.fontSize = _settings.FontSize;
-                  }
-
                   if (_scrollView != null)
                   {
                         _scrollView.style.height = _settings.PreviewHeight;
+                  }
+
+                  if (_linesContainer == null)
+                  {
+                        return;
+                  }
+
+                  foreach (VisualElement child in _linesContainer.Children())
+                  {
+                        if (child is Label lbl)
+                        {
+                              lbl.style.fontSize = _settings.FontSize;
+                        }
                   }
             }
 
             private void UpdateSearchStatus()
             {
-                  if (_searchStatusLabel != null)
+                  if (_searchStatusLabel == null)
                   {
-                        _searchStatusLabel.text = _searchManager.GetSearchStatusText();
-                        _prevButton.SetEnabled(_searchManager.HasSearchResults);
-                        _nextButton.SetEnabled(_searchManager.HasSearchResults);
+                        return;
                   }
-            }
 
-            internal void UpdateCodeContent(string newContent)
-            {
-                  if (_codeLabel != null)
-                  {
-                        _codeLabel.text = newContent;
-                  }
-            }
-
-            internal void UpdateSearchableContent(string[] lines)
-            {
-                  _currentLines = lines;
-
-                  if (_searchManager.HasSearchQuery)
-                  {
-                        _searchManager.PerformSearch(_currentLines);
-                  }
+                  _searchStatusLabel.text = _searchManager.GetSearchStatusText();
+                  _prevButton.SetEnabled(_searchManager.HasSearchResults);
+                  _nextButton.SetEnabled(_searchManager.HasSearchResults);
             }
 
             private void ScrollToLine(int lineIndex)
             {
                   _scrollView.schedule.Execute(() =>
                   {
-                        if (lineIndex < 0)
+                        if (lineIndex < 0 || _linesContainer.childCount == 0)
                         {
                               return;
                         }
 
-                        float singleLineHeight = _codeLabel.resolvedStyle.fontSize * 1.2f;
-                        _scrollView.scrollOffset = new Vector2(0, lineIndex * singleLineHeight);
+                        int clamped = Mathf.Clamp(lineIndex, 0, _linesContainer.childCount - 1);
+                        VisualElement lineEl = _linesContainer[clamped];
+                        _scrollView.ScrollTo(lineEl);
                   });
             }
-
-#region Helpers
 
             private static VisualElement CreateSpacer(int height = 10) => new() { style = { height = height } };
 
@@ -653,7 +609,5 @@ namespace OpalStudio.CodePreview.Editor.View
                   ScriptType.Yaml => ".yml",
                   _ => ""
             };
-
-#endregion
       }
 }

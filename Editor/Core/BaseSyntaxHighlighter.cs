@@ -2,7 +2,7 @@
 
 namespace OpalStudio.CodePreview.Editor.Core
 {
-     internal abstract class BaseSyntaxHighlighter
+      internal abstract class BaseSyntaxHighlighter
       {
             protected Dictionary<string, string> Colors { get; private set; }
 

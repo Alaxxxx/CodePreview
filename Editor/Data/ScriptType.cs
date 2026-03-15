@@ -1,6 +1,6 @@
 ﻿namespace OpalStudio.CodePreview.Editor.Data
 {
-     internal enum ScriptType
+      internal enum ScriptType
       {
             CSharp,
             Readme,

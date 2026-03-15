@@ -3,16 +3,16 @@
 namespace OpalStudio.CodePreview.Editor.Data
 {
       [Serializable]
-     internal class FileInfo
+      internal class FileInfo
       {
-           internal DateTimeOffset LastModifiedTime;
-           internal long FileSize;
-           internal int TotalLines;
-           internal int TotalWords;
-           internal int TotalChars;
-           internal int CommentLines;
+            internal DateTimeOffset LastModifiedTime;
+            internal long FileSize;
+            internal int TotalLines;
+            internal int TotalWords;
+            internal int TotalChars;
+            internal int CommentLines;
 
-           internal string FormattedSize => FormatFileSize(FileSize);
+            internal string FormattedSize => FormatFileSize(FileSize);
 
             private static string FormatFileSize(long bytes)
             {

@@ -6,14 +6,14 @@ using Object = UnityEngine.Object;
 
 namespace OpalStudio.CodePreview.Editor.Helpers
 {
-     sealed internal class FileManager
+      sealed internal class FileManager
       {
             private string _filePath;
             private FileInfo _fileInfo;
             private string[] _originalLines;
             private string[] _displayLines;
 
-           internal bool CheckForChanges(Object asset)
+            internal bool CheckForChanges(Object asset)
             {
                   string path = AssetDatabase.GetAssetPath(asset);
 
@@ -32,7 +32,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   return true;
             }
 
-           internal void LoadScript(MonoScript script)
+            internal void LoadScript(MonoScript script)
             {
                   _filePath = AssetDatabase.GetAssetPath(script);
 
@@ -57,7 +57,7 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   }
             }
 
-           internal void LoadFromContent(string[] lines, string filePath)
+            internal void LoadFromContent(string[] lines, string filePath)
             {
                   _filePath = filePath;
                   _originalLines = lines;
@@ -77,20 +77,20 @@ namespace OpalStudio.CodePreview.Editor.Helpers
                   }
             }
 
-           internal void SetLimitedLines(string[] limitedLines)
+            internal void SetLimitedLines(string[] limitedLines)
             {
                   _displayLines = limitedLines;
             }
 
-           internal string[] GetLines() => _originalLines;
+            internal string[] GetLines() => _originalLines;
 
-           internal string[] GetDisplayLines() => _displayLines;
+            internal string[] GetDisplayLines() => _displayLines;
 
-           internal string GetFilePath() => _filePath;
+            internal string GetFilePath() => _filePath;
 
-           internal FileInfo GetFileInfo() => _fileInfo;
+            internal FileInfo GetFileInfo() => _fileInfo;
 
-           internal bool HasContent() => _originalLines is { Length: > 0 };
+            internal bool HasContent() => _originalLines is { Length: > 0 };
 
             private static FileInfo CalculateFileInfo(string[] lines)
             {

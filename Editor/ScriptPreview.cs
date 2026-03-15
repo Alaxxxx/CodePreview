@@ -52,7 +52,7 @@ namespace OpalStudio.CodePreview.Editor
 
                   RefreshContent(script);
 
-                  VisualElement root = _uiRenderer.CreateRootElement(_syntaxHighlighter.GetProcessedContent(), _fileManager.GetFileInfo());
+                  VisualElement root = _uiRenderer.CreateRootElement(_syntaxHighlighter.GetProcessedLines(), _fileManager.GetFileInfo());
 
                   root.schedule.Execute(CheckForFileChanges).Every(1000);
 
@@ -68,9 +68,7 @@ namespace OpalStudio.CodePreview.Editor
                         return;
                   }
 
-                  bool hasChanges = _fileManager.CheckForChanges(script);
-
-                  if (hasChanges)
+                  if (_fileManager.CheckForChanges(script))
                   {
                         RefreshContent(script, false);
                   }
@@ -96,39 +94,34 @@ namespace OpalStudio.CodePreview.Editor
 
                         if (lines != null && lines.Length > _settings.MaxLinesToDisplay)
                         {
-                              string[] limitedLines = new string[_settings.MaxLinesToDisplay];
-                              Array.Copy(lines, limitedLines, _settings.MaxLinesToDisplay);
-                              _fileManager.SetLimitedLines(limitedLines);
+                              string[] limited = new string[_settings.MaxLinesToDisplay];
+                              Array.Copy(lines, limited, _settings.MaxLinesToDisplay);
+                              _fileManager.SetLimitedLines(limited);
                         }
 
                         ScriptType scriptType = ScriptTypeDetector.DetectType(_fileManager.GetFilePath());
                         _syntaxHighlighter.ProcessContent(_fileManager.GetDisplayLines(), scriptType, _settings);
 
-                        if (_uiRenderer != null)
-                        {
-                              _uiRenderer.UpdateSearchableContent(_fileManager.GetDisplayLines());
-                        }
-
+                        _uiRenderer?.UpdateSearchableContent(_fileManager.GetDisplayLines());
                         _searchManager.PerformSearch(_fileManager.GetDisplayLines());
 
                         if (!forceFullRebuild && _uiRenderer != null)
                         {
-                              _uiRenderer.UpdateCodeContent(_syntaxHighlighter.GetProcessedContent());
+                              _uiRenderer.UpdateCodeContent(_syntaxHighlighter.GetProcessedLines());
                         }
                   }
                   catch (Exception e)
                   {
                         UnityEngine.Debug.LogError($"Error refreshing script content: {e.Message}");
                         _syntaxHighlighter.SetErrorContent($"Error loading file: {e.Message}");
-
-                        _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedContent());
+                        _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedLines());
                   }
             }
 
             private void OnSearchResultsChanged()
             {
                   _syntaxHighlighter.UpdateSearchHighlighting(_searchManager.GetSearchQuery(), _searchManager.GetSearchResults());
-                  _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedContent());
+                  _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedLines());
             }
 
             private void OnSettingsChanged()
@@ -137,7 +130,7 @@ namespace OpalStudio.CodePreview.Editor
                   {
                         ScriptType scriptType = ScriptTypeDetector.DetectType(_fileManager.GetFilePath());
                         _syntaxHighlighter.ProcessContent(_fileManager.GetDisplayLines(), scriptType, _settings);
-                        _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedContent());
+                        _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedLines());
                   }
             }
       }

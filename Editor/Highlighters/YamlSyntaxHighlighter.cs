@@ -13,18 +13,18 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
             {
                   SetColors(new Dictionary<string, string>
                   {
-                              ["key"] = isDarkTheme ? "#9CDCFE" : "#0451A5",
-                              ["value"] = isDarkTheme ? "#CE9178" : "#A31515",
-                              ["number"] = isDarkTheme ? "#B5CEA8" : "#098658",
-                              ["boolean"] = isDarkTheme ? "#569CD6" : "#0000FF",
-                              ["comment"] = isDarkTheme ? "#6A9955" : "#008000",
-                              ["listMarker"] = isDarkTheme ? "#DCDCAA" : "#795E26",
-                              ["anchor"] = isDarkTheme ? "#C586C0" : "#9B59B6",
-                              ["reference"] = isDarkTheme ? "#C586C0" : "#9B59B6",
-                              ["directive"] = isDarkTheme ? "#FF6B35" : "#FF4500",
-                              ["documentSeparator"] = isDarkTheme ? "#808080" : "#666666",
-                              ["unitySpecial"] = isDarkTheme ? "#4EC9B0" : "#2B91AF",
-                              ["multilineOperator"] = isDarkTheme ? "#FF6B35" : "#FF4500"
+                        ["key"] = isDarkTheme ? "#9CDCFE" : "#0451A5",
+                        ["value"] = isDarkTheme ? "#CE9178" : "#A31515",
+                        ["number"] = isDarkTheme ? "#B5CEA8" : "#098658",
+                        ["boolean"] = isDarkTheme ? "#569CD6" : "#0000FF",
+                        ["comment"] = isDarkTheme ? "#6A9955" : "#008000",
+                        ["listMarker"] = isDarkTheme ? "#DCDCAA" : "#795E26",
+                        ["anchor"] = isDarkTheme ? "#C586C0" : "#9B59B6",
+                        ["reference"] = isDarkTheme ? "#C586C0" : "#9B59B6",
+                        ["directive"] = isDarkTheme ? "#FF6B35" : "#FF4500",
+                        ["documentSeparator"] = isDarkTheme ? "#808080" : "#666666",
+                        ["unitySpecial"] = isDarkTheme ? "#4EC9B0" : "#2B91AF",
+                        ["multilineOperator"] = isDarkTheme ? "#FF6B35" : "#FF4500"
                   });
             }
 
@@ -60,16 +60,14 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
 
                         if (!inMultiLineString)
                         {
-                              if ((line.Contains("|", StringComparison.OrdinalIgnoreCase) || line.Contains(">", StringComparison.OrdinalIgnoreCase)) &&
-                                  Regex.IsMatch(line, @":\s*[|>][-+]?\s*$"))
+                              if ((line.Contains("|", StringComparison.OrdinalIgnoreCase) || line.Contains(">", StringComparison.OrdinalIgnoreCase)) && Regex.IsMatch(line, @":\s*[|>][-+]?\s*$"))
                               {
                                     inMultiLineString = true;
                               }
                         }
                         else
                         {
-                              if (string.IsNullOrWhiteSpace(line) || line.StartsWith("  ", StringComparison.OrdinalIgnoreCase) ||
-                                  line.StartsWith("\t", StringComparison.OrdinalIgnoreCase))
+                              if (string.IsNullOrWhiteSpace(line) || line.StartsWith("  ", StringComparison.OrdinalIgnoreCase) || line.StartsWith("\t", StringComparison.OrdinalIgnoreCase))
                               {
                                     multiLineStrings.Add(i);
                               }
@@ -109,9 +107,8 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
 
             private string ApplyUnitySpecialHighlighting(string result)
             {
-                  Regex regex = GetOrCreateRegex(
-                              @"\b(fileID|guid|type|m_ObjectHideFlags|m_CorrespondingSourceObject|m_PrefabInstance|m_PrefabAsset|m_GameObject|m_Enabled|m_Script):",
-                              RegexOptions.Compiled);
+                  Regex regex = GetOrCreateRegex(@"\b(fileID|guid|type|m_ObjectHideFlags|m_CorrespondingSourceObject|m_PrefabInstance|m_PrefabAsset|m_GameObject|m_Enabled|m_Script):",
+                        RegexOptions.Compiled);
 
                   return regex.Replace(result, match =>
                   {
@@ -173,9 +170,9 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   }
 
                   if ((value.StartsWith("\"", StringComparison.OrdinalIgnoreCase) && value.EndsWith("\"", StringComparison.OrdinalIgnoreCase)) ||
-                      (value.StartsWith("'", StringComparison.OrdinalIgnoreCase) && value.EndsWith("'", StringComparison.OrdinalIgnoreCase)) ||
-                      !string.IsNullOrEmpty(value) && value != "|" && value != ">" && !value.StartsWith("&", StringComparison.OrdinalIgnoreCase) &&
-                      !value.StartsWith("*", StringComparison.OrdinalIgnoreCase) && !value.StartsWith("#", StringComparison.OrdinalIgnoreCase))
+                      (value.StartsWith("'", StringComparison.OrdinalIgnoreCase) && value.EndsWith("'", StringComparison.OrdinalIgnoreCase)) || !string.IsNullOrEmpty(value) && value != "|" &&
+                      value != ">" && !value.StartsWith("&", StringComparison.OrdinalIgnoreCase) && !value.StartsWith("*", StringComparison.OrdinalIgnoreCase) &&
+                      !value.StartsWith("#", StringComparison.OrdinalIgnoreCase))
                   {
                         return ApplyColorTag(value, this.Colors["value"]);
                   }

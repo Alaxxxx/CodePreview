@@ -4,25 +4,25 @@ using OpalStudio.CodePreview.Editor.Core;
 
 namespace OpalStudio.CodePreview.Editor.Highlighters
 {
-     sealed internal class JsonSyntaxHighlighter : BaseSyntaxHighlighter
+      sealed internal class JsonSyntaxHighlighter : BaseSyntaxHighlighter
       {
             private readonly static Dictionary<string, Regex> RegexCache = new();
 
-           internal override void Initialize(bool isDarkTheme)
+            internal override void Initialize(bool isDarkTheme)
             {
                   SetColors(new Dictionary<string, string>
                   {
-                              ["property"] = isDarkTheme ? "#9CDCFE" : "#0451A5",
-                              ["string"] = isDarkTheme ? "#CE9178" : "#A31515",
-                              ["number"] = isDarkTheme ? "#B5CEA8" : "#098658",
-                              ["boolean"] = isDarkTheme ? "#569CD6" : "#0000FF",
-                              ["null"] = isDarkTheme ? "#569CD6" : "#0000FF",
-                              ["bracket"] = isDarkTheme ? "#FFD700" : "#DAA520",
-                              ["punctuation"] = isDarkTheme ? "#D4D4D4" : "#000000"
+                        ["property"] = isDarkTheme ? "#9CDCFE" : "#0451A5",
+                        ["string"] = isDarkTheme ? "#CE9178" : "#A31515",
+                        ["number"] = isDarkTheme ? "#B5CEA8" : "#098658",
+                        ["boolean"] = isDarkTheme ? "#569CD6" : "#0000FF",
+                        ["null"] = isDarkTheme ? "#569CD6" : "#0000FF",
+                        ["bracket"] = isDarkTheme ? "#FFD700" : "#DAA520",
+                        ["punctuation"] = isDarkTheme ? "#D4D4D4" : "#000000"
                   });
             }
 
-           internal override string ProcessLine(string line, bool isInMultiLineComment)
+            internal override string ProcessLine(string line, bool isInMultiLineComment)
             {
                   if (string.IsNullOrEmpty(line))
                   {
@@ -39,7 +39,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   return result;
             }
 
-           internal override HashSet<int> GetMultiLineCommentLines(string[] lines)
+            internal override HashSet<int> GetMultiLineCommentLines(string[] lines)
             {
                   return new HashSet<int>();
             }
@@ -81,7 +81,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   Regex bracketRegex = GetOrCreateRegex(@"[\{\}\[\]]", RegexOptions.Compiled);
                   result = bracketRegex.Replace(result, match => ApplyColorTag(match.Value, this.Colors["bracket"]));
 
-                  Regex punctRegex = GetOrCreateRegex(@"[,:;]", RegexOptions.Compiled);
+                  Regex punctRegex = GetOrCreateRegex("[,:;]", RegexOptions.Compiled);
                   result = punctRegex.Replace(result, match => ApplyColorTag(match.Value, this.Colors["punctuation"]));
 
                   return result;

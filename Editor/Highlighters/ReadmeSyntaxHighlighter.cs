@@ -13,20 +13,20 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
             {
                   SetColors(new Dictionary<string, string>
                   {
-                              ["header"] = isDarkTheme ? "#569CD6" : "#0000FF",
-                              ["bold"] = isDarkTheme ? "#DCDCAA" : "#795E26",
-                              ["italic"] = isDarkTheme ? "#C586C0" : "#9B59B6",
-                              ["code"] = isDarkTheme ? "#CE9178" : "#A31515",
-                              ["link"] = isDarkTheme ? "#4EC9B0" : "#2B91AF",
-                              ["url"] = isDarkTheme ? "#4EC9B0" : "#0066CC",
-                              ["listItem"] = isDarkTheme ? "#B5CEA8" : "#098658",
-                              ["quote"] = isDarkTheme ? "#6A9955" : "#008000",
-                              ["separator"] = "#808080",
-                              ["strikethrough"] = isDarkTheme ? "#808080" : "#999999",
-                              ["taskList"] = isDarkTheme ? "#FF6B35" : "#FF4500",
-                              ["image"] = isDarkTheme ? "#E6C547" : "#DAA520",
-                              ["githubRef"] = isDarkTheme ? "#F78166" : "#D73027",
-                              ["table"] = isDarkTheme ? "#808080" : "#666666"
+                        ["header"] = isDarkTheme ? "#569CD6" : "#0000FF",
+                        ["bold"] = isDarkTheme ? "#DCDCAA" : "#795E26",
+                        ["italic"] = isDarkTheme ? "#C586C0" : "#9B59B6",
+                        ["code"] = isDarkTheme ? "#CE9178" : "#A31515",
+                        ["link"] = isDarkTheme ? "#4EC9B0" : "#2B91AF",
+                        ["url"] = isDarkTheme ? "#4EC9B0" : "#0066CC",
+                        ["listItem"] = isDarkTheme ? "#B5CEA8" : "#098658",
+                        ["quote"] = isDarkTheme ? "#6A9955" : "#008000",
+                        ["separator"] = "#808080",
+                        ["strikethrough"] = isDarkTheme ? "#808080" : "#999999",
+                        ["taskList"] = isDarkTheme ? "#FF6B35" : "#FF4500",
+                        ["image"] = isDarkTheme ? "#E6C547" : "#DAA520",
+                        ["githubRef"] = isDarkTheme ? "#F78166" : "#D73027",
+                        ["table"] = isDarkTheme ? "#808080" : "#666666"
                   });
             }
 
@@ -100,8 +100,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                               inCodeBlock = !inCodeBlock;
                               codeBlocks.Add(i);
                         }
-                        else if (inCodeBlock || lines[i].Length >= 4 && lines[i].StartsWith("    ", StringComparison.OrdinalIgnoreCase) &&
-                                 !string.IsNullOrWhiteSpace(lines[i][4..]))
+                        else if (inCodeBlock || lines[i].Length >= 4 && lines[i].StartsWith("    ", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(lines[i][4..]))
                         {
                               codeBlocks.Add(i);
                         }
