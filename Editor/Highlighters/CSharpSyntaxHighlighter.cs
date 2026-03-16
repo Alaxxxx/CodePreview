@@ -63,21 +63,24 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                         return line;
                   }
 
-                  if (isInMultiLineComment)
+                  int indentLength = 0;
+
+                  while (indentLength < line.Length && (line[indentLength] == ' ' || line[indentLength] == '\t'))
                   {
-                        return ApplyColorTag(WrapAngleBrackets(line), Colors["comment"]);
+                        indentLength++;
                   }
 
-                  string trimmed = line.TrimStart();
+                  string indent = line[..indentLength];
+                  string content = line[indentLength..];
 
-                  if (trimmed.StartsWith("//", StringComparison.Ordinal))
+                  if (isInMultiLineComment || content.StartsWith("//", StringComparison.Ordinal))
                   {
-                        return ApplyColorTag(WrapAngleBrackets(line), Colors["comment"]);
+                        return indent + ApplyColorTag(WrapAngleBrackets(content), Colors["comment"]);
                   }
 
-                  if (trimmed.StartsWith("#", StringComparison.Ordinal))
+                  if (content.StartsWith("#", StringComparison.Ordinal))
                   {
-                        return ApplyColorTag(WrapAngleBrackets(line), Colors["preprocessor"]);
+                        return indent + ApplyColorTag(WrapAngleBrackets(content), Colors["preprocessor"]);
                   }
 
                   Match usingMatch = Regex.Match(line, @"^(\s*)using\s+([\w\.]+);");
@@ -87,7 +90,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                         return usingMatch.Groups[1].Value + ApplyColorTag("using", Colors["keyword"]) + " " + ApplyColorTag(usingMatch.Groups[2].Value, Colors["customType"]) + ";";
                   }
 
-                  return TokenizeAndColor(line);
+                  return indent + TokenizeAndColor(content);
             }
 
             internal override HashSet<int> GetMultiLineCommentLines(string[] lines)

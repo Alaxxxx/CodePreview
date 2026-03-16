@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using OpalStudio.CodePreview.Editor.Data;
 using OpalStudio.CodePreview.Editor.Helpers;
 using OpalStudio.CodePreview.Editor.Settings;
@@ -163,7 +164,9 @@ namespace OpalStudio.CodePreview.Editor.View
 
                   foreach (string line in processedLines)
                   {
-                        var label = new Label(line)
+                        string displayLine = ReplaceSpacesOutsideTags((line ?? "").Replace("\t", "    "));
+
+                        var label = new Label(displayLine)
                         {
                               enableRichText = true,
                               style =
@@ -171,12 +174,34 @@ namespace OpalStudio.CodePreview.Editor.View
                                     unityFont = _editorFont,
                                     fontSize = _settings.FontSize,
                                     color = new Color(0.85f, 0.85f, 0.85f),
-
                                     whiteSpace = WhiteSpace.NoWrap,
                               }
                         };
                         _linesContainer.Add(label);
                   }
+            }
+
+            private static string ReplaceSpacesOutsideTags(string line)
+            {
+                  var sb = new StringBuilder();
+                  bool insideTag = false;
+
+                  foreach (char c in line)
+                  {
+                        if (c == '<')
+                        {
+                              insideTag = true;
+                        }
+
+                        sb.Append(!insideTag && c == ' ' ? '\u00A0' : c);
+
+                        if (c == '>')
+                        {
+                              insideTag = false;
+                        }
+                  }
+
+                  return sb.ToString();
             }
 
             internal void UpdateCodeContent(string[] processedLines)
@@ -550,8 +575,22 @@ namespace OpalStudio.CodePreview.Editor.View
 
                         int clamped = Mathf.Clamp(lineIndex, 0, _linesContainer.childCount - 1);
                         VisualElement lineEl = _linesContainer[clamped];
-                        _scrollView.ScrollTo(lineEl);
+
+                        lineEl.RegisterCallbackOnce<GeometryChangedEvent>(_ => CenterOnElement(lineEl));
+                        CenterOnElement(lineEl);
                   });
+            }
+
+            private void CenterOnElement(VisualElement lineEl)
+            {
+                  float elementY = lineEl.layout.y;
+                  float elementHeight = lineEl.layout.height;
+                  float viewportHeight = _scrollView.contentViewport.layout.height;
+
+                  float targetY = elementY - (viewportHeight / 2f) + (elementHeight / 2f);
+                  targetY = Mathf.Max(0, targetY);
+
+                  _scrollView.scrollOffset = new Vector2(0, targetY);
             }
 
             private static VisualElement CreateSpacer(int height = 10) => new() { style = { height = height } };
