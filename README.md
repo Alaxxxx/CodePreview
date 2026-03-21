@@ -69,7 +69,19 @@
 Choose your preferred installation method below. The recommended method is via Git URL.
 
 <details>
-<summary><strong>1. Install via Git URL (Recommended)</strong></summary>
+<summary><strong>1. Install via Unity Asset Store (Recommended)</strong></summary>
+<br>
+This is the easiest way to install and receive updates.
+
+1.  Open the <a href="https://assetstore.unity.com/packages/slug/339468">CodePreview page on the Unity Asset Store</a> and click <b>"Add to My Assets"</b>.
+2.  In your Unity project, open the **Package Manager** (`Window > Package Manager`).
+3.  In the Package Manager window, select the **"Packages: My Assets"** view from the top-left dropdown menu.
+4.  Find **CodePreview** in the list and click the **"Import"** button.
+
+</details>
+
+<details>
+<summary><strong>2. Install via Git URL</strong></summary>
 <br>
 
 This method installs the package directly from GitHub and allows you to update it easily.
