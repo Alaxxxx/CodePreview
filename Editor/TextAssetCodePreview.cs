@@ -13,7 +13,7 @@ using FileInfo = OpalStudio.CodePreview.Editor.Data.FileInfo;
 namespace OpalStudio.CodePreview.Editor
 {
       [CustomEditor(typeof(TextAsset), true)]
-      sealed internal class TextAssetCodePreview : UnityEditor.Editor
+      internal sealed class TextAssetCodePreview : UnityEditor.Editor
       {
             private UnityEditor.Editor _defaultEditor;
             private VisualElement _rootElement;
@@ -179,7 +179,8 @@ namespace OpalStudio.CodePreview.Editor
 
             private void OnSearchResultsChanged()
             {
-                  _syntaxHighlighter.UpdateSearchHighlighting(_searchManager.GetSearchQuery(), _searchManager.GetSearchResults());
+                  _syntaxHighlighter.UpdateSearchHighlighting(_searchManager.GetSearchQuery(), _searchManager.GetSearchResults(),
+                        _searchManager.CaseSensitiveSearch);
                   _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedLines());
             }
 

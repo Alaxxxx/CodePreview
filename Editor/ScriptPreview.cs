@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 namespace OpalStudio.CodePreview.Editor
 {
       [CustomEditor(typeof(MonoScript))]
-      sealed internal class ScriptPreview : UnityEditor.Editor
+      internal sealed class ScriptPreview : UnityEditor.Editor
       {
             private FileManager _fileManager;
             private UIToolkitRenderer _uiRenderer;
@@ -120,7 +120,8 @@ namespace OpalStudio.CodePreview.Editor
 
             private void OnSearchResultsChanged()
             {
-                  _syntaxHighlighter.UpdateSearchHighlighting(_searchManager.GetSearchQuery(), _searchManager.GetSearchResults());
+                  _syntaxHighlighter.UpdateSearchHighlighting(_searchManager.GetSearchQuery(), _searchManager.GetSearchResults(),
+                        _searchManager.CaseSensitiveSearch);
                   _uiRenderer?.UpdateCodeContent(_syntaxHighlighter.GetProcessedLines());
             }
 

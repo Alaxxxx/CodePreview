@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using OpalStudio.CodePreview.Editor.Core;
 using OpalStudio.CodePreview.Editor.Data;
 using OpalStudio.CodePreview.Editor.Settings;
@@ -7,16 +8,20 @@ using UnityEditor;
 
 namespace OpalStudio.CodePreview.Editor.Highlighters
 {
-      sealed internal class SyntaxHighlighter
+      internal sealed class SyntaxHighlighter
       {
+            private const char SearchMarkerStart = '\uE000';
+            private const char SearchMarkerEnd = '\uE001';
+
             private readonly Dictionary<ScriptType, BaseSyntaxHighlighter> _highlighters = new();
 
-            private string[] _processedLines = System.Array.Empty<string>();
+            private string[] _processedLines = Array.Empty<string>();
 
             private string[] _currentLines;
             private ScriptType _currentScriptType;
             private HashSet<int> _searchResults = new();
             private string _searchQuery = "";
+            private bool _caseSensitiveSearch;
 
             internal SyntaxHighlighter()
             {
@@ -31,7 +36,7 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
             {
                   if (lines == null || lines.Length == 0)
                   {
-                        _processedLines = System.Array.Empty<string>();
+                        _processedLines = Array.Empty<string>();
 
                         return;
                   }
@@ -61,10 +66,14 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   for (int i = 0; i < lines.Length; i++)
                   {
                         string line = lines[i].TrimEnd('\r');
-                        bool isInMultiLine = multiLineComments.Contains(i);
-                        string processedLine = highlighter.ProcessLine(line, isInMultiLine);
 
-                        processedLine = ApplySearchHighlighting(processedLine, i);
+                        string lineWithMarkers = InjectSearchMarkers(line, i);
+
+                        bool isInMultiLine = multiLineComments.Contains(i);
+                        string processedLine = highlighter.ProcessLine(lineWithMarkers, isInMultiLine);
+
+                        processedLine = ConvertMarkersToHighlight(processedLine);
+
                         processedLine = ProcessLineNumbers(processedLine, i, settings.ShowLineNumbers, lines.Length);
 
                         _processedLines[i] = processedLine;
@@ -95,9 +104,52 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   return $"<color=#808080>{lineNumber}</color>  {line}";
             }
 
-            private string ApplySearchHighlighting(string line, int lineIndex)
+            private string InjectSearchMarkers(string line, int lineIndex)
             {
-                  if (string.IsNullOrEmpty(_searchQuery) || !_searchResults.Contains(lineIndex))
+                  if (string.IsNullOrEmpty(_searchQuery) || !_searchResults.Contains(lineIndex) || string.IsNullOrEmpty(line))
+                  {
+                        return line;
+                  }
+
+                  StringComparison comparison = _caseSensitiveSearch ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                  var sb = new StringBuilder(line.Length + 16);
+                  int searchLen = _searchQuery.Length;
+                  int pos = 0;
+
+                  while (pos < line.Length)
+                  {
+                        int matchIdx = line.IndexOf(_searchQuery, pos, comparison);
+
+                        if (matchIdx < 0)
+                        {
+                              sb.Append(line, pos, line.Length - pos);
+
+                              break;
+                        }
+
+                        if (matchIdx > pos)
+                        {
+                              sb.Append(line, pos, matchIdx - pos);
+                        }
+
+                        sb.Append(SearchMarkerStart);
+                        sb.Append(line, matchIdx, searchLen);
+                        sb.Append(SearchMarkerEnd);
+
+                        pos = matchIdx + searchLen;
+                  }
+
+                  return sb.ToString();
+            }
+
+            private static string ConvertMarkersToHighlight(string line)
+            {
+                  if (string.IsNullOrEmpty(line))
+                  {
+                        return line;
+                  }
+
+                  if (line.IndexOf(SearchMarkerStart) < 0)
                   {
                         return line;
                   }
@@ -105,19 +157,40 @@ namespace OpalStudio.CodePreview.Editor.Highlighters
                   bool isDark = EditorGUIUtility.isProSkin;
                   string highlightColor = isDark ? "#FFEB3B" : "#FFD700";
                   const string textColor = "#000000";
-                  string escapedTerm = Regex.Escape(_searchQuery);
+                  string openTag = $"<mark={highlightColor}><color={textColor}><b>";
+                  const string closeTag = "</b></color></mark>";
 
-                  return Regex.Replace(line, escapedTerm, $"<mark={highlightColor}><color={textColor}><b>$0</b></color></mark>", RegexOptions.IgnoreCase);
+                  var sb = new StringBuilder(line.Length + 64);
+
+                  foreach (char c in line)
+                  {
+                        if (c == SearchMarkerStart)
+                        {
+                              sb.Append(openTag);
+                        }
+                        else if (c == SearchMarkerEnd)
+                        {
+                              sb.Append(closeTag);
+                        }
+                        else
+                        {
+                              sb.Append(c);
+                        }
+                  }
+
+                  return sb.ToString();
             }
 
-            internal void UpdateSearchHighlighting(string searchQuery, HashSet<int> searchResults)
+            internal void UpdateSearchHighlighting(string searchQuery, HashSet<int> searchResults, bool caseSensitive = false)
             {
                   _searchQuery = searchQuery;
                   _searchResults = searchResults;
+                  _caseSensitiveSearch = caseSensitive;
 
                   if (_currentLines != null)
                   {
                         var settings = new PreviewSettings();
+                        settings.LoadPreferences();
                         ProcessContent(_currentLines, _currentScriptType, settings);
                   }
             }

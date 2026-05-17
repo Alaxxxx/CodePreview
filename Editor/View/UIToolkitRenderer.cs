@@ -12,7 +12,7 @@ using Object = UnityEngine.Object;
 
 namespace OpalStudio.CodePreview.Editor.View
 {
-      sealed internal class UIToolkitRenderer
+      internal sealed class UIToolkitRenderer
       {
             private readonly PreviewSettings _settings;
             private readonly SearchManager _searchManager;
@@ -36,8 +36,12 @@ namespace OpalStudio.CodePreview.Editor.View
             private readonly Color _borderColor = EditorGUIUtility.isProSkin ? new Color(0.15f, 0.15f, 0.15f) : new Color(0.7f, 0.7f, 0.7f);
             private readonly Color _codeBackgroundColor = new(0.12f, 0.12f, 0.12f);
             private readonly Color _headerBackgroundColor = EditorGUIUtility.isProSkin ? new Color(0.2f, 0.2f, 0.2f) : new Color(0.9f, 0.9f, 0.9f);
-            private readonly Color _sectionBackgroundColor = EditorGUIUtility.isProSkin ? new Color(0.18f, 0.18f, 0.18f) : new Color(0.88f, 0.88f, 0.88f);
-            private readonly Font _editorFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+            private readonly Color _sectionBackgroundColor =
+                  EditorGUIUtility.isProSkin ? new Color(0.18f, 0.18f, 0.18f) : new Color(0.88f, 0.88f, 0.88f);
+
+            private readonly Font _editorFont = EditorGUIUtility.Load("Fonts/RobotoMono/RobotoMono-Regular.ttf") as Font
+                                                ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
             internal UIToolkitRenderer(PreviewSettings settings, SearchManager searchManager, Object target)
             {
@@ -53,24 +57,132 @@ namespace OpalStudio.CodePreview.Editor.View
                   {
                         style =
                         {
-                              paddingTop = 15, paddingBottom = 15,
-                              paddingLeft = 15, paddingRight = 15,
+                              paddingTop = 8, paddingBottom = 8,
+                              paddingLeft = 8, paddingRight = 8,
                               flexGrow = 1
                         }
                   };
 
-                  root.Add(CreateHeader(fileInfo));
-                  root.Add(CreateSpacer(15));
-                  root.Add(CreateSearchSection());
-                  root.Add(CreateSpacer(15));
-                  root.Add(CreateOptionsSection());
-                  root.Add(CreateSpacer(15));
+                  root.Add(CreateMinimalHeader());
+                  root.Add(CreateSpacer(6));
+                  root.Add(CreateDetailsFoldout(fileInfo));
+                  root.Add(CreateSpacer(6));
                   root.Add(CreateCodePreviewSection(processedLines));
 
                   _settings.OnSettingsChanged += UpdateStyles;
                   _searchManager.OnSearchResultsChanged += UpdateSearchStatus;
 
                   return root;
+            }
+
+            private VisualElement CreateMinimalHeader()
+            {
+                  var headerBox = new VisualElement
+                  {
+                        style =
+                        {
+                              flexDirection = FlexDirection.Row,
+                              alignItems = Align.Center,
+                              backgroundColor = _headerBackgroundColor,
+                              borderBottomColor = _borderColor,
+                              borderTopColor = _borderColor,
+                              borderLeftColor = _borderColor,
+                              borderRightColor = _borderColor,
+                              borderBottomWidth = 1, borderTopWidth = 1,
+                              borderLeftWidth = 1, borderRightWidth = 1,
+                              borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
+                              borderTopLeftRadius = 4, borderTopRightRadius = 4,
+                              paddingTop = 6, paddingBottom = 6,
+                              paddingLeft = 10, paddingRight = 10
+                        }
+                  };
+
+                  var icon = new Image { style = { width = 16, height = 16, marginRight = 6 } };
+                  var title = new Label { style = { unityFontStyleAndWeight = FontStyle.Bold, fontSize = 13, flexGrow = 1 } };
+
+                  if (_monoScriptTarget != null)
+                  {
+                        icon.image = EditorGUIUtility.IconContent("cs Script Icon").image;
+                        title.text = $"{_monoScriptTarget.name}.cs";
+                  }
+                  else if (_textAssetTarget != null)
+                  {
+                        ScriptType scriptType = ScriptTypeDetector.DetectType(AssetDatabase.GetAssetPath(_textAssetTarget));
+                        icon.image = GetIconForType(scriptType).image;
+                        title.text = _textAssetTarget.name + GetExtensionForType(scriptType);
+                  }
+
+                  var typeLabel = new Label
+                  {
+                        style =
+                        {
+                              paddingLeft = 8, paddingRight = 8,
+                              paddingTop = 2, paddingBottom = 2,
+                              backgroundColor = EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f),
+                              borderBottomLeftRadius = 3, borderBottomRightRadius = 3,
+                              borderTopLeftRadius = 3, borderTopRightRadius = 3,
+                              fontSize = 10,
+                              unityFontStyleAndWeight = FontStyle.Bold
+                        }
+                  };
+
+                  if (_monoScriptTarget != null)
+                  {
+                        (string label, Color color) = GetScriptTypeInfo(_monoScriptTarget);
+                        typeLabel.text = label;
+                        typeLabel.style.color = color;
+                  }
+                  else if (_textAssetTarget != null)
+                  {
+                        (string label, Color color) =
+                              GetTextAssetTypeInfo(ScriptTypeDetector.DetectType(AssetDatabase.GetAssetPath(_textAssetTarget)));
+                        typeLabel.text = label;
+                        typeLabel.style.color = color;
+                  }
+
+                  headerBox.Add(icon);
+                  headerBox.Add(title);
+                  headerBox.Add(typeLabel);
+
+                  return headerBox;
+            }
+
+            private VisualElement CreateDetailsFoldout(FileInfo fileInfo)
+            {
+                  var detailsFoldout = new Foldout
+                  {
+                        text = "⚙️ Details & Options",
+                        value = _settings.OptionsFoldout,
+                        style =
+                        {
+                              backgroundColor = _sectionBackgroundColor,
+                              paddingLeft = 10, paddingRight = 10,
+                              paddingTop = 6, paddingBottom = 6,
+                              borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
+                              borderTopLeftRadius = 4, borderTopRightRadius = 4,
+                              borderBottomColor = _borderColor, borderTopColor = _borderColor,
+                              borderLeftColor = _borderColor, borderRightColor = _borderColor,
+                              borderBottomWidth = 1, borderTopWidth = 1,
+                              borderLeftWidth = 1, borderRightWidth = 1
+                        }
+                  };
+                  detailsFoldout.RegisterValueChangedCallback(evt => _settings.OptionsFoldout = evt.newValue);
+
+                  var content = new VisualElement { style = { paddingTop = 8 } };
+
+                  if (fileInfo != null)
+                  {
+                        content.Add(CreateFileStats(fileInfo));
+                        content.Add(CreateSpacer(10));
+                  }
+
+                  content.Add(CreateSearchContent());
+                  content.Add(CreateSpacer(10));
+                  content.Add(CreateOptionsContent());
+
+                  detailsFoldout.contentContainer.Add(content);
+
+                  return detailsFoldout;
             }
 
             private VisualElement CreateCodePreviewSection(string[] processedLines)
@@ -81,10 +193,10 @@ namespace OpalStudio.CodePreview.Editor.View
                   {
                         style =
                         {
-                              paddingLeft = 15,
-                              paddingRight = 15,
-                              paddingTop = 12,
-                              paddingBottom = 12,
+                              paddingLeft = 12,
+                              paddingRight = 12,
+                              paddingTop = 10,
+                              paddingBottom = 10,
                         }
                   };
 
@@ -106,10 +218,10 @@ namespace OpalStudio.CodePreview.Editor.View
                               borderTopWidth = 1,
                               borderLeftWidth = 1,
                               borderRightWidth = 1,
-                              borderBottomLeftRadius = 6,
-                              borderBottomRightRadius = 6,
-                              borderTopLeftRadius = 6,
-                              borderTopRightRadius = 6,
+                              borderBottomLeftRadius = 4,
+                              borderBottomRightRadius = 4,
+                              borderTopLeftRadius = 4,
+                              borderTopRightRadius = 4,
                         }
                   };
                   _scrollView.Add(_linesContainer);
@@ -120,15 +232,17 @@ namespace OpalStudio.CodePreview.Editor.View
                         {
                               flexDirection = FlexDirection.Row,
                               justifyContent = Justify.SpaceBetween,
-                              marginTop = 12
+                              marginTop = 8
                         }
                   };
 
-                  var editBtn = new Button(static () => AssetDatabase.OpenAsset(Selection.activeObject)) { text = "📝 Edit", style = { flexGrow = 1, marginRight = 6 } };
-                  var showBtn = new Button(static () => EditorGUIUtility.PingObject(Selection.activeObject)) { text = "📁 Show", style = { flexGrow = 1, marginRight = 6 } };
+                  var editBtn = new Button(static () => AssetDatabase.OpenAsset(Selection.activeObject))
+                        { text = "📝 Edit", style = { flexGrow = 1, marginRight = 4 } };
+                  var showBtn = new Button(static () => EditorGUIUtility.PingObject(Selection.activeObject))
+                        { text = "📁 Show", style = { flexGrow = 1, marginRight = 4 } };
 
                   var copyPathBtn = new Button(static () => EditorGUIUtility.systemCopyBuffer = AssetDatabase.GetAssetPath(Selection.activeObject))
-                        { text = "📋 Copy Path", style = { flexGrow = 1, marginRight = 6 } };
+                        { text = "📋 Copy Path", style = { flexGrow = 1, marginRight = 4 } };
 
                   var copyCodeBtn = new Button(static () =>
                   {
@@ -224,94 +338,19 @@ namespace OpalStudio.CodePreview.Editor.View
                   }
             }
 
-            private VisualElement CreateHeader(FileInfo fileInfo)
-            {
-                  var headerBox = new VisualElement
-                  {
-                        style =
-                        {
-                              backgroundColor = _headerBackgroundColor,
-                              borderBottomColor = _borderColor,
-                              borderTopColor = _borderColor,
-                              borderLeftColor = _borderColor,
-                              borderRightColor = _borderColor,
-                              borderBottomWidth = 1, borderTopWidth = 1,
-                              borderLeftWidth = 1, borderRightWidth = 1,
-                              borderBottomLeftRadius = 6, borderBottomRightRadius = 6,
-                              borderTopLeftRadius = 6, borderTopRightRadius = 6,
-                              paddingBottom = 15, paddingTop = 15,
-                              paddingLeft = 15, paddingRight = 15
-                        }
-                  };
-
-                  var topRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-                  var icon = new Image { style = { width = 18, height = 18, marginRight = 8 } };
-                  var title = new Label { style = { unityFontStyleAndWeight = FontStyle.Bold, fontSize = 15, flexGrow = 1 } };
-
-                  if (_monoScriptTarget != null)
-                  {
-                        icon.image = EditorGUIUtility.IconContent("cs Script Icon").image;
-                        title.text = $"{_monoScriptTarget.name}.cs";
-                  }
-                  else if (_textAssetTarget != null)
-                  {
-                        ScriptType scriptType = ScriptTypeDetector.DetectType(AssetDatabase.GetAssetPath(_textAssetTarget));
-                        icon.image = GetIconForType(scriptType).image;
-                        title.text = _textAssetTarget.name + GetExtensionForType(scriptType);
-                  }
-
-                  var typeLabel = new Label
-                  {
-                        style =
-                        {
-                              paddingLeft = 10, paddingRight = 10,
-                              paddingTop = 4, paddingBottom = 4,
-                              backgroundColor = EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f),
-                              borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
-                              borderTopLeftRadius = 4, borderTopRightRadius = 4,
-                              fontSize = 11,
-                              unityFontStyleAndWeight = FontStyle.Bold
-                        }
-                  };
-
-                  if (_monoScriptTarget != null)
-                  {
-                        (string label, Color color) = GetScriptTypeInfo(_monoScriptTarget);
-                        typeLabel.text = label;
-                        typeLabel.style.color = color;
-                  }
-                  else if (_textAssetTarget != null)
-                  {
-                        (string label, Color color) = GetTextAssetTypeInfo(ScriptTypeDetector.DetectType(AssetDatabase.GetAssetPath(_textAssetTarget)));
-                        typeLabel.text = label;
-                        typeLabel.style.color = color;
-                  }
-
-                  topRow.Add(icon);
-                  topRow.Add(title);
-                  topRow.Add(typeLabel);
-                  headerBox.Add(topRow);
-
-                  if (fileInfo != null)
-                  {
-                        headerBox.Add(CreateSpacer(12));
-                        headerBox.Add(CreateFileStats(fileInfo));
-                  }
-
-                  return headerBox;
-            }
-
             private static VisualElement CreateFileStats(FileInfo fileInfo)
             {
                   var statsContainer = new VisualElement
                   {
                         style =
                         {
-                              backgroundColor = EditorGUIUtility.isProSkin ? new Color(0.15f, 0.15f, 0.15f, 0.5f) : new Color(0.85f, 0.85f, 0.85f, 0.5f),
-                              paddingTop = 10, paddingBottom = 10,
-                              paddingLeft = 12, paddingRight = 12,
-                              borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
-                              borderTopLeftRadius = 4, borderTopRightRadius = 4
+                              backgroundColor = EditorGUIUtility.isProSkin
+                                    ? new Color(0.15f, 0.15f, 0.15f, 0.5f)
+                                    : new Color(0.85f, 0.85f, 0.85f, 0.5f),
+                              paddingTop = 8, paddingBottom = 8,
+                              paddingLeft = 10, paddingRight = 10,
+                              borderBottomLeftRadius = 3, borderBottomRightRadius = 3,
+                              borderTopLeftRadius = 3, borderTopRightRadius = 3
                         }
                   };
 
@@ -322,7 +361,8 @@ namespace OpalStudio.CodePreview.Editor.View
                         label.style.fontSize = 11;
                   });
 
-                  var row1 = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 6 } };
+                  var row1 = new VisualElement
+                        { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 4 } };
                   var l1 = new Label($"📄 {fileInfo.TotalLines} lines");
                   var w1 = new Label($"📝 {fileInfo.TotalWords} words");
                   var c1 = new Label($"🔤 {fileInfo.TotalChars} chars");
@@ -350,32 +390,21 @@ namespace OpalStudio.CodePreview.Editor.View
                   return statsContainer;
             }
 
-            private VisualElement CreateSearchSection()
+            private VisualElement CreateSearchContent()
             {
-                  var searchFoldout = new Foldout
+                  var content = new VisualElement();
+
+                  var sectionTitle = new Label("🔍 Search & Navigation")
                   {
-                        text = "🔍 Search & Navigation",
-                        value = _settings.SearchFoldout,
-                        style =
-                        {
-                              backgroundColor = _sectionBackgroundColor,
-                              paddingLeft = 12, paddingRight = 12,
-                              paddingTop = 8, paddingBottom = 8,
-                              borderBottomLeftRadius = 6, borderBottomRightRadius = 6,
-                              borderTopLeftRadius = 6, borderTopRightRadius = 6,
-                              borderBottomColor = _borderColor, borderTopColor = _borderColor,
-                              borderLeftColor = _borderColor, borderRightColor = _borderColor,
-                              borderBottomWidth = 1, borderTopWidth = 1,
-                              borderLeftWidth = 1, borderRightWidth = 1
-                        }
+                        style = { unityFontStyleAndWeight = FontStyle.Bold, fontSize = 11, marginBottom = 6 }
                   };
-                  searchFoldout.RegisterValueChangedCallback(evt => _settings.SearchFoldout = evt.newValue);
+                  content.Add(sectionTitle);
 
-                  var content = new VisualElement { style = { paddingTop = 10 } };
-                  var searchFieldRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10 } };
-                  var findLabel = new Label("Find:") { style = { width = 50, marginRight = 8 } };
+                  var searchFieldRow = new VisualElement
+                        { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 6 } };
+                  var findLabel = new Label("Find:") { style = { width = 50, marginRight = 6 } };
 
-                  _searchField = new TextField { value = _searchManager.SearchQuery, style = { flexGrow = 1, marginRight = 10 } };
+                  _searchField = new TextField { value = _searchManager.SearchQuery, style = { flexGrow = 1, marginRight = 8 } };
 
                   _searchField.RegisterValueChangedCallback(evt =>
                   {
@@ -403,8 +432,8 @@ namespace OpalStudio.CodePreview.Editor.View
                   searchFieldRow.Add(_searchField);
                   searchFieldRow.Add(caseToggle);
 
-                  var navRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10 } };
-                  var navButtons = new VisualElement { style = { flexDirection = FlexDirection.Row, marginRight = 10 } };
+                  var navRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 6 } };
+                  var navButtons = new VisualElement { style = { flexDirection = FlexDirection.Row, marginRight = 8 } };
 
                   _prevButton = new Button(() =>
                   {
@@ -427,7 +456,8 @@ namespace OpalStudio.CodePreview.Editor.View
                   navButtons.Add(_prevButton);
                   navButtons.Add(_nextButton);
 
-                  _searchStatusLabel = new Label(_searchManager.GetSearchStatusText()) { style = { flexGrow = 1, unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 10 } };
+                  _searchStatusLabel = new Label(_searchManager.GetSearchStatusText())
+                        { style = { flexGrow = 1, unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 8 } };
 
                   var clearButton = new Button(() =>
                   {
@@ -440,8 +470,8 @@ namespace OpalStudio.CodePreview.Editor.View
                   navRow.Add(clearButton);
 
                   var goToRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-                  var goToLabel = new Label("Go to Line:") { style = { width = 80, marginRight = 8 } };
-                  var goToField = new IntegerField { value = _searchManager.GoToLine, style = { width = 80, marginRight = 8 } };
+                  var goToLabel = new Label("Go to Line:") { style = { width = 80, marginRight = 6 } };
+                  var goToField = new IntegerField { value = _searchManager.GoToLine, style = { width = 80, marginRight = 6 } };
                   goToField.RegisterValueChangedCallback(evt => _searchManager.GoToLine = evt.newValue);
                   var goButton = new Button(() => ScrollToLine(_searchManager.GetGoToLineZeroBased())) { text = "Go", style = { width = 50 } };
 
@@ -452,36 +482,23 @@ namespace OpalStudio.CodePreview.Editor.View
                   content.Add(searchFieldRow);
                   content.Add(navRow);
                   content.Add(goToRow);
-                  searchFoldout.contentContainer.Add(content);
 
-                  return searchFoldout;
+                  return content;
             }
 
-            private VisualElement CreateOptionsSection()
+            private VisualElement CreateOptionsContent()
             {
-                  var optionsFoldout = new Foldout
+                  var content = new VisualElement();
+
+                  var sectionTitle = new Label("🎛️ Display Options")
                   {
-                        text = "⚙️ Display Options",
-                        value = _settings.OptionsFoldout,
-                        style =
-                        {
-                              backgroundColor = _sectionBackgroundColor,
-                              paddingLeft = 12, paddingRight = 12,
-                              paddingTop = 8, paddingBottom = 8,
-                              borderBottomLeftRadius = 6, borderBottomRightRadius = 6,
-                              borderTopLeftRadius = 6, borderTopRightRadius = 6,
-                              borderBottomColor = _borderColor, borderTopColor = _borderColor,
-                              borderLeftColor = _borderColor, borderRightColor = _borderColor,
-                              borderBottomWidth = 1, borderTopWidth = 1,
-                              borderLeftWidth = 1, borderRightWidth = 1
-                        }
+                        style = { unityFontStyleAndWeight = FontStyle.Bold, fontSize = 11, marginBottom = 6 }
                   };
-                  optionsFoldout.RegisterValueChangedCallback(evt => _settings.OptionsFoldout = evt.newValue);
+                  content.Add(sectionTitle);
 
-                  var content = new VisualElement { style = { paddingTop = 10 } };
-                  var togglesContainer = new VisualElement { style = { marginBottom = 12 } };
+                  var togglesContainer = new VisualElement { style = { marginBottom = 8 } };
 
-                  _lineNumbersToggle = new Toggle("Show Line Numbers") { value = _settings.ShowLineNumbers, style = { marginBottom = 8 } };
+                  _lineNumbersToggle = new Toggle("Show Line Numbers") { value = _settings.ShowLineNumbers, style = { marginBottom = 4 } };
                   _lineNumbersToggle.RegisterValueChangedCallback(evt => _settings.ShowLineNumbers = evt.newValue);
 
                   _syntaxHighlightingToggle = new Toggle("Enable Syntax Highlighting") { value = _settings.EnableSyntaxHighlighting };
@@ -490,23 +507,24 @@ namespace OpalStudio.CodePreview.Editor.View
                   togglesContainer.Add(_lineNumbersToggle);
                   togglesContainer.Add(_syntaxHighlightingToggle);
 
-                  var fontSizeRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10 } };
-                  var fsLabel = new Label("Font Size") { style = { width = 180, marginRight = 10 } };
+                  var fontSizeRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 6 } };
+                  var fsLabel = new Label("Font Size") { style = { width = 180, marginRight = 8 } };
                   _fontSizeSlider = new SliderInt(8, 20) { value = _settings.FontSize, showInputField = true, style = { flexGrow = 1 } };
                   _fontSizeSlider.RegisterValueChangedCallback(evt => _settings.FontSize = evt.newValue);
                   fontSizeRow.Add(fsLabel);
                   fontSizeRow.Add(_fontSizeSlider);
 
-                  var heightRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10 } };
-                  var hLabel = new Label("Preview Height") { style = { width = 180, marginRight = 10 } };
+                  var heightRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 6 } };
+                  var hLabel = new Label("Preview Height") { style = { width = 180, marginRight = 8 } };
                   _previewHeightSlider = new SliderInt(200, 800) { value = _settings.PreviewHeight, showInputField = true, style = { flexGrow = 1 } };
                   _previewHeightSlider.RegisterValueChangedCallback(evt => _settings.PreviewHeight = evt.newValue);
                   heightRow.Add(hLabel);
                   heightRow.Add(_previewHeightSlider);
 
-                  var maxLinesRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 12 } };
-                  var mlLabel = new Label("Max Lines for Highlighting") { style = { width = 180, marginRight = 10 } };
-                  _maxLinesSlider = new SliderInt(100, 10000) { value = _settings.MaxLinesToDisplay, showInputField = true, style = { flexGrow = 1 } };
+                  var maxLinesRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8 } };
+                  var mlLabel = new Label("Max Lines for Highlighting") { style = { width = 180, marginRight = 8 } };
+                  _maxLinesSlider = new SliderInt(100, 10000)
+                        { value = _settings.MaxLinesToDisplay, showInputField = true, style = { flexGrow = 1 } };
                   _maxLinesSlider.RegisterValueChangedCallback(evt => _settings.MaxLinesToDisplay = evt.newValue);
                   maxLinesRow.Add(mlLabel);
                   maxLinesRow.Add(_maxLinesSlider);
@@ -526,9 +544,8 @@ namespace OpalStudio.CodePreview.Editor.View
                   content.Add(heightRow);
                   content.Add(maxLinesRow);
                   content.Add(resetButton);
-                  optionsFoldout.contentContainer.Add(content);
 
-                  return optionsFoldout;
+                  return content;
             }
 
             private void UpdateStyles()
@@ -636,9 +653,10 @@ namespace OpalStudio.CodePreview.Editor.View
                   _ => ("Text File", Color.gray)
             };
 
-            private static GUIContent GetIconForType(ScriptType scriptType) => scriptType is ScriptType.Json or ScriptType.XML or ScriptType.Readme or ScriptType.Yaml
-                  ? EditorGUIUtility.IconContent("TextAsset Icon")
-                  : EditorGUIUtility.IconContent("DefaultAsset Icon");
+            private static GUIContent GetIconForType(ScriptType scriptType) =>
+                  scriptType is ScriptType.Json or ScriptType.XML or ScriptType.Readme or ScriptType.Yaml
+                        ? EditorGUIUtility.IconContent("TextAsset Icon")
+                        : EditorGUIUtility.IconContent("DefaultAsset Icon");
 
             private static string GetExtensionForType(ScriptType scriptType) => scriptType switch
             {
